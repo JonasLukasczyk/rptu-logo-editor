@@ -19,6 +19,10 @@ const myApp = createApp(App);
 
 myApp.use(Quasar, {
   plugins: { Dialog },
+  config: {
+    ripple: {
+    }
+  }
 });
 
 myApp.mount('#app');

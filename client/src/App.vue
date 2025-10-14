@@ -1,10 +1,15 @@
 <script setup>
 import App from './App.js';
 
+import {useQuasar} from 'quasar';
+const $q = useQuasar();
+// $q.dark.set(true);
+
 import { reactive } from 'vue';
 import LoginMask from './components/LoginMask.vue';
 import LogoList from './components/LogoList.vue';
 import LogoEditor from './components/LogoEditor.vue';
+import LogoEditorStepper from './components/LogoEditorStepper.vue';
 import SideMenu from './components/SideMenu.vue';
 
 const _ = reactive({
@@ -17,11 +22,8 @@ const _ = reactive({
   <q-layout view="hHh LpR fFf">
     <q-header class="bg-primary text-white">
       <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
-          </q-avatar>
-          Title
+        <q-toolbar-title class='text-red-hat'>
+            RPTU - Logo Editor
         </q-toolbar-title>
         <q-btn v-if="!App._.connected" icon="warning" />
         <q-item v-if='App._.user' class="q-mb-sm" clickable v-ripple dense>
@@ -59,7 +61,22 @@ const _ = reactive({
     <q-page-container>
       <LoginMask v-if="App._.user === null" />
       <LogoList v-else-if="App._.logo === null" />
-      <LogoEditor v-else />
+      <LogoEditorStepper v-else />
     </q-page-container>
   </q-layout>
 </template>
+
+<style>
+
+@font-face {
+  font-family: 'RedHat';
+  src: url('assets/red-hat-display-v21-latin-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+.text-red-hat {
+  font-family: 'RedHat', sans-serif;
+}
+
+</style>

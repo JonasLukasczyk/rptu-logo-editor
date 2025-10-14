@@ -237,7 +237,7 @@ const randomColor = () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .logo_container {
   zoom: 1;
   padding: 2em;

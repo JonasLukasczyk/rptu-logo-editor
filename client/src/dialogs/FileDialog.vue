@@ -34,10 +34,9 @@ const processFile = event => {
 </script>
 
 <template>
-  <q-dialog ref="dialogRef" backdrop-filter="blur(4px) grayscale(50%)">
+  <q-dialog ref="dialogRef" backdrop-filter="blur(4px) grayscale(50%)" @hide="onDialogHide">
     <q-card class="q-dialog-plugin" style="min-width: 45em; border: 0.1em solid white">
       <input type="file" ref="file" @change="processFile" accept="image/*" />
-      <q-btn label='Clear' @click='onDialogOK(null)' />
     </q-card>
   </q-dialog>
 </template>

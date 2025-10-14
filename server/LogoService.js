@@ -41,12 +41,8 @@ const LogoService = {
       t_color: '#000000',
       b_color: '#ffffff',
       show_rptu_text: true,
-      internal:[
-        false,
-        'Bezeichnung der Institution',
-        'Prof. Dr. Laura Muster',
-        null
-      ],
+      internal: [],
+      external: [],
     };
     await LogoService.dbRun(`INSERT INTO logos ('time','email','recipe') VALUES (?,?,?)`, [
       recipe.time,
