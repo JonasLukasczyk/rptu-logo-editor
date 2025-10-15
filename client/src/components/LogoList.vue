@@ -58,4 +58,9 @@ const computeSvg = async (recipe, el) => {
   </q-list>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+  svg {
+    /* max-height:10em; */
+  }
+</style>

@@ -179,10 +179,9 @@ const setPictorial = async c => {
 
 <template>
   <!-- {{_}} -->
-
   <div>
     <div class="logo_container" style="text-align: center">
-      <svg ref="svg_container"></svg>
+      <svg ref="svg_container" />
     </div>
 
     <q-stepper v-model="_.step" header-nav ref="stepper" color="primary" animated>
@@ -208,7 +207,7 @@ const setPictorial = async c => {
         </div>
       </q-step>
 
-      <q-step :name="3" title="Co-Branding, intern" icon="add_box">
+      <q-step :name="3" title="Co-Branding" icon="add_box">
         <div class="main_container">
           <q-card
             v-for="(internal, i) in App._.logo.recipe.internal"
@@ -253,7 +252,7 @@ const setPictorial = async c => {
         <!-- <q-input label='title0' v-model='App._.logo.recipe.internal' /> -->
       </q-step>
 
-      <q-step :name="4" title="Co-Branding, extern" icon="add_box"> TODO </q-step>
+      <!-- <q-step :name="4" title="Co-Branding, extern" icon="add_box"> TODO </q-step> -->
 
       <q-step :name="5" title="Color Theme" icon="palette">
         <div class="template_list compact" style="max-height: 20em">
@@ -267,24 +266,25 @@ const setPictorial = async c => {
 </template>
 
 <style scoped>
-.main_container {
-  max-width: 40em;
-  margin: 0 auto;
-}
-
 .logo_container {
   zoom: 1;
-  padding: 0;
+  padding: 2em;
+  min-height: 15em;
+  height: 15em;
 }
 
 .logo_container svg {
   /* border: 1px solid black; */
   /* margin: 1em; */
-  max-height: 20em;
+  max-height: 12em;
 }
 
 .compact svg {
   float: left;
+}
+
+.template_list {
+  text-align: center;
 }
 
 .template_list svg {

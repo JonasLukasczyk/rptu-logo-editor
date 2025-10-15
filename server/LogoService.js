@@ -67,7 +67,7 @@ const LogoService = {
   },
 
   dropLogoTable: async () => {
-    await LogoService.dbRun(`DROP TABLE logos`, []);
+    await LogoService.dbRun(`DROP TABLE IF EXISTS logos`, []);
     // await fs.rm(`./data/`,{recursive:true,force:true});
     // await fs.mkdir(`./data/`,{recursive:true});
   },
