@@ -2,6 +2,8 @@ import { nextTick } from 'vue';
 import $ from './Constants.js';
 import red_hat_font_b64 from './assets/red-hat-display-v21-latin-regular.js';
 
+import default_sub_logo from './assets/default_sub_logo.js';
+
 const SvgRenderer = {
   newElement: tag => {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -28,7 +30,7 @@ const SvgRenderer = {
     svg.insertBefore(style, svg.firstChild);
   },
 
-  fromRecipe: async (recipe, svg) => {
+  fromLogo: async (logo, svg) => {
     if (!svg) {
       svg = SvgRenderer.newElement('svg');
       SvgRenderer.addStyle(svg);
@@ -51,9 +53,9 @@ const SvgRenderer = {
     for (let i in letters) {
       const letter = letters[i];
       const x = $.letter_bb[0] * i;
-      const y = ($.letter_bb[1] + $.letter_padding) * recipe.wm[i];
+      const y = ($.letter_bb[1] + $.letter_padding) * logo.wm[i];
       const path = SvgRenderer.newElement('path');
-      path.setAttribute('fill', recipe.t_color);
+      path.setAttribute('fill', logo.t_color);
       path.setAttribute('d', $[`${letter}_path`]);
       path.setAttribute('transform', `translate(${x},${y})`);
       fg.appendChild(path);
@@ -61,14 +63,14 @@ const SvgRenderer = {
 
     X = 4 * $.gl;
 
-    if (recipe.show_rptu_text) {
+    if (logo.show_rptu_text) {
       X += $.gs;
-      let path0,path1;
+      let path0, path1;
       {
         path0 = SvgRenderer.newElement('path');
         path0.setAttribute('d', $.text_rp);
         const y = $.letter_bb[0] + $.letter_padding;
-        path0.setAttribute('fill', recipe.t_color);
+        path0.setAttribute('fill', logo.t_color);
         path0.setAttribute('transform', `translate(${X},${y})`);
         fg.appendChild(path0);
       }
@@ -77,7 +79,7 @@ const SvgRenderer = {
         path1 = SvgRenderer.newElement('path');
         path1.setAttribute('d', $.text_kl);
         const y = 2 * ($.letter_bb[0] + $.letter_padding);
-        path1.setAttribute('fill', recipe.t_color);
+        path1.setAttribute('fill', logo.t_color);
         path1.setAttribute('transform', `translate(${X},${y})`);
         fg.appendChild(path1);
       }
@@ -86,13 +88,12 @@ const SvgRenderer = {
       X += path0.getBBox().width;
     }
 
-    if (recipe.internal.length) {
+    if (logo.co_branding.length) {
       X += 2 * $.gs;
     }
 
-    // internal
-    for (let internal of recipe.internal) {
-
+    // Co-Branding
+    for (let partner of logo.co_branding) {
       const iElement = SvgRenderer.newElement('g');
       fg.appendChild(iElement);
 
@@ -101,55 +102,76 @@ const SvgRenderer = {
         const i = SvgRenderer.newElement('path');
         const h = $.y_coords.slice(0, 6).reduce((i, agg) => i + agg, 0);
         i.setAttribute('d', `M ${X} ${0} L ${X} ${h}`);
-        i.setAttribute('stroke', recipe.t_color);
+        i.setAttribute('stroke', logo.t_color);
         i.setAttribute('stroke-width', 2);
         iElement.appendChild(i);
       }
 
       X += 2 * $.gs;
 
-      // internal text
+      // row 1
       {
         const e = SvgRenderer.newElement('text');
-        e.classList.add('internal');
         e.setAttribute('x', X);
         e.setAttribute('y', 0);
-        e.setAttribute('font-family', 'Arial');
         e.setAttribute('font-size', '18');
-        e.setAttribute('fill', recipe.t_color);
+        e.setAttribute('fill', logo.t_color);
         e.setAttribute('text-anchor', 'start');
         e.setAttribute('dominant-baseline', 'hanging');
         e.setAttribute('font-weight', 'bold');
-        e.textContent = internal.caption0;
+        e.textContent = partner.external ? 'In Kooperation mit' : partner.caption0;
         iElement.appendChild(e);
       }
 
+      // row 2
       {
         const e = SvgRenderer.newElement('text');
-        e.classList.add('internal');
         e.setAttribute('x', X);
         e.setAttribute('y', 35);
-        e.setAttribute('font-family', 'Arial');
         e.setAttribute('font-size', '18');
-        e.setAttribute('fill', recipe.t_color);
-        e.textContent = internal.subcaption0;
+        if (partner.caption1) e.setAttribute('font-weight', 'bold');
+        e.setAttribute('fill', logo.t_color);
+        e.textContent = partner.external ? partner.caption0 : partner.caption1 || partner.subcaption0;
+        iElement.appendChild(e);
+      }
+
+      // row 3
+      if (partner.caption0 && partner.caption1 && partner.subcaption0) {
+        const e = SvgRenderer.newElement('text');
+        e.setAttribute('x', X);
+        e.setAttribute('y', $.gl + $.gs);
+        e.setAttribute('font-size', '18');
+        e.setAttribute('fill', logo.t_color);
+        e.setAttribute('text-anchor', 'start');
+        e.setAttribute('dominant-baseline', 'hanging');
+        e.textContent = partner.subcaption0;
+        iElement.appendChild(e);
+      }
+
+      // row 4
+      if (partner.caption0 && partner.caption1 && partner.subcaption0 && partner.subcaption1) {
+        const e = SvgRenderer.newElement('text');
+        e.setAttribute('x', X);
+        e.setAttribute('y', 2 * $.gl + $.gs);
+        e.setAttribute('font-size', '18');
+        e.setAttribute('fill', logo.t_color);
+        e.textContent = partner.subcaption1;
         iElement.appendChild(e);
       }
 
       // logo
-      if (recipe.internal.logo !== null) {
+      const sublogo = partner.logo || default_sub_logo;
+
+      if (sublogo) {
+        const mini = partner.caption1;
+        const y = ($.gl + $.gs) * (mini ? 2 : 1);
+        const h = mini ? $.gl : 2 * $.gl + $.gs;
 
         const e = SvgRenderer.newElement('image');
         e.setAttribute('x', X);
-        e.setAttribute(
-          'y',
-          $.y_coords.slice(0, 3).reduce((i, agg) => i + agg, 0)
-        );
-        e.setAttribute(
-          'height',
-          $.y_coords.slice(-3).reduce((i, agg) => i + agg, 0)
-        );
-        e.setAttribute('href', internal.logo);
+        e.setAttribute('y', y);
+        e.setAttribute('height', h);
+        e.setAttribute('href', sublogo);
         iElement.appendChild(e);
 
         await nextTick();
@@ -161,9 +183,10 @@ const SvgRenderer = {
       X += iElement.getBBox().width;
     }
 
-    const logo_padding = 20;
-    const height = 131;
+    const logo_padding = $.gl;
+    const height = 3*$.gl+2*$.gs;
     // const width = 530;
+    await nextTick();
     const width = fg.getBBox().width;
     // svg.setAttribute(
     //   'viewBox',
@@ -182,7 +205,7 @@ const SvgRenderer = {
       i.setAttribute('y', -logo_padding);
       i.setAttribute('width', width + 2 * logo_padding);
       i.setAttribute('height', height + 2 * logo_padding);
-      i.setAttribute('fill', recipe.b_color);
+      i.setAttribute('fill', logo.b_color);
       bg.appendChild(i);
     }
 

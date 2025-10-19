@@ -12,9 +12,7 @@ const LogoService = {
           console.error(err);
           resolve([]);
         } else {
-          for(let r of rows)
-            if(r.hasOwnProperty('recipe'))
-              r.recipe = JSON.parse(r.recipe);
+          for (let r of rows) if (r.hasOwnProperty('logo')) r.logo = JSON.parse(r.logo);
           resolve(rows);
         }
       });
@@ -22,7 +20,7 @@ const LogoService = {
   },
 
   dbRun: async (sql, params) => {
-    console.log(sql,params)
+    console.log(sql, params);
     return await new Promise((resolve, reject) => {
       LogoService.db.run(sql, params, err => {
         if (err) {
@@ -33,33 +31,45 @@ const LogoService = {
     });
   },
 
+  updateLogo: async logo => {
+    await LogoService.dbRun(`UPDATE logos SET data=? WHERE id=?`, [JSON.stringify(logo), logo.id]);
+  },
+
   newLogo: async user => {
-    const recipe = {
+    const logo = {
+      id: Date.now(),
       time: Date.now(),
       user: user,
       wm: [0, 2, 1, 1],
       t_color: '#000000',
       b_color: '#ffffff',
       show_rptu_text: true,
-      internal: [],
-      external: [],
+      co_branding: [],
     };
-    await LogoService.dbRun(`INSERT INTO logos ('time','email','recipe') VALUES (?,?,?)`, [
-      recipe.time,
+    await LogoService.dbRun(`INSERT INTO logos ('id','time','email','data') VALUES (?,?,?,?)`, [
+      logo.id,
+      logo.time,
       user.email,
-      JSON.stringify(recipe, null, 2),
+      JSON.stringify(logo),
     ]);
-    return (await LogoService.dbAll(`SELECT * FROM logos ORDER BY id DESC LIMIT 1`))[0];
+    return logo;
+  },
+
+  getLogos: async user => {
+    const data = await LogoService.dbAll(`SELECT data FROM logos WHERE email=?`, [
+      user.email,
+    ]);
+    return data.map(i=>JSON.parse(i.data));
   },
 
   createLogoTable: async () => {
     await LogoService.dbRun(
       `
       CREATE TABLE IF NOT EXISTS logos (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          id INTEGER PRIMARY KEY,
           time INTEGER,
           email TEXT,
-          recipe TEXT
+          data TEXT
         )
     `,
       []

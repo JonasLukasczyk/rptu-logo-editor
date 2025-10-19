@@ -3,13 +3,12 @@ import { reactive, nextTick } from 'vue';
 import { io } from 'socket.io-client';
 import $ from './Constants.js';
 
-import default_sub_logo from './assets/default_sub_logo.js';
-
 const App = {
   _: reactive({
     connected: false,
     logo: null,
     user: null,
+    minified: true,
     templates: [],
   }),
 
@@ -22,11 +21,7 @@ const App = {
     return true;
   },
 
-  clone: obj => {
-    const clone = JSON.parse(JSON.stringify(obj));
-    if (typeof clone === 'object' && clone.hasOwnProperty('id')) clone.id = crypto.randomUUID();
-    return clone;
-  },
+  clone: obj => JSON.parse(JSON.stringify(obj)),
 
   debounce: (callback, wait) => {
     let timeoutId = null;
@@ -85,8 +80,7 @@ App.io.a_emit = (name, params) => {
     t_color: '#000000',
     b_color: '#ffffff',
     show_rptu_text: false,
-    internal: [],
-    external: [],
+    co_branding: [],
   });
   App._.templates.push({
     time: Date.now(),
@@ -95,16 +89,16 @@ App.io.a_emit = (name, params) => {
     t_color: '#000000',
     b_color: '#ffffff',
     show_rptu_text: true,
-    internal: [],
-    external: [],
+    co_branding: [],
   });
 
-  const internal = {
+  const partner = {
     caption0: 'Bezeichnung der Institution',
     caption1: '',
     subcaption0: 'Prof. Dr. Laura Muster',
     subcaption1: '',
-    logo: default_sub_logo,
+    logo: null,
+    external: false
   };
 
   App._.templates.push({
@@ -114,8 +108,7 @@ App.io.a_emit = (name, params) => {
     t_color: '#000000',
     b_color: '#ffffff',
     show_rptu_text: false,
-    internal: [internal],
-    external: [],
+    co_branding: [App.clone(partner)],
   });
 
   App._.templates.push({
@@ -125,8 +118,7 @@ App.io.a_emit = (name, params) => {
     t_color: '#000000',
     b_color: '#ffffff',
     show_rptu_text: false,
-    internal: [internal, internal],
-    external: [],
+    co_branding: [App.clone(partner),App.clone(partner)],
   });
 }
 

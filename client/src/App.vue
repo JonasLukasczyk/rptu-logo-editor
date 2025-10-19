@@ -5,17 +5,34 @@ import { useQuasar } from 'quasar';
 const $q = useQuasar();
 // $q.dark.set(true);
 
-import { reactive } from 'vue';
+import { reactive, onMounted } from 'vue';
 import LoginMask from './components/LoginMask.vue';
 import LogoList from './components/LogoList.vue';
 import LogoEditor from './components/LogoEditor.vue';
 import LogoEditorStepper from './components/LogoEditorStepper.vue';
 import SideMenu from './components/SideMenu.vue';
-import red_hat_font_b64 from './assets/red-hat-display-v21-latin-regular.js';
+import RedHatB64 from './assets/red-hat-display-v21-latin-regular.js';
 
 const _ = reactive({
   leftDrawerOpen: false,
   rightDrawerOpen: false,
+});
+
+onMounted(() => {
+  const fontName = 'RedHat';
+  const fontStyle = `
+  @font-face {
+    font-family: '${fontName}';
+    src: url('data:font/woff2;base64,${RedHatB64}') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+`;
+
+  const style = document.createElement('style');
+  style.type = 'text/css';
+  style.appendChild(document.createTextNode(fontStyle));
+  document.head.appendChild(style);
 });
 </script>
 
@@ -43,7 +60,7 @@ const _ = reactive({
     <!-- </q-drawer> -->
 
     <q-page-container>
-      <div style='max-width:50em; margin: 0 auto;'>
+      <div style="max-width: 50em; margin: 0 auto">
         <LoginMask v-if="App._.user === null" />
         <LogoList v-else-if="App._.logo === null" />
         <LogoEditorStepper v-else />
@@ -53,9 +70,8 @@ const _ = reactive({
 </template>
 
 <style>
-
 body {
- background-color: #e0e0e0;
+  background-color: #e0e0e0;
 }
 
 @font-face {

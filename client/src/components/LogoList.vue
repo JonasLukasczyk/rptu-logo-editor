@@ -11,42 +11,28 @@ const _ = reactive({
 
 const init = async () => {
   console.log(App);
-  _.logos = await App.LogoService.dbAll(`SELECT * FROM logos WHERE email='${App._.user.email}';`, []);
-
-  await nextTick();
-
-  svg_containers.value.forEach((el, i) => {
-    const svg = SvgRenderer.fromRecipe(_.logos[i].recipe);
-    el.innerHTML = ''; // Clear previous content if necessary
-    el.appendChild(svg);
-  });
+  _.logos = await App.LogoService.getLogos(App._.user);
 };
 
 const newLogo = async () => {
   App._.logo = await App.LogoService.newLogo(App._.user);
 };
-
 onMounted(init);
-
-const computeSvg = async (recipe, el) => {
-  await nextTick();
-  SvgRenderer.fromRecipe(recipe, el);
-};
 </script>
 
 <template>
-  <h3>LogoListe</h3>
-
+  <h3>Logo List</h3>
+  {{_.logos}}
   <q-list dense>
-    <q-item v-for="(i, index) in _.logos" :key="index" clickable v-ripple @click="() => (App._.logo = i)">
+    <q-item v-for="(logo, index) in _.logos" :key="index" clickable v-ripple @click="() => (App._.logo = App.clone(logo))">
       <q-item-section>
-        <q-item-label>{{ i.id }}</q-item-label>
+        <q-item-label>{{ logo.id }}</q-item-label>
         <q-item-label caption lines="1"
-          >Created: {{ new Intl.DateTimeFormat('de-DE').format(new Date(i.time)) }}</q-item-label
+          >Created: {{ new Intl.DateTimeFormat('de-DE').format(new Date(logo.time)) }}</q-item-label
         >
       </q-item-section>
       <q-item-section>
-        <svg :ref="el => computeSvg(i.recipe, el)" />
+        <svg :ref="el => SvgRenderer.fromLogo(logo, el)" />
       </q-item-section>
     </q-item>
     <q-item clickable v-ripple @click="newLogo">
@@ -59,8 +45,7 @@ const computeSvg = async (recipe, el) => {
 </template>
 
 <style scoped>
-
-  svg {
-    /* max-height:10em; */
-  }
+svg {
+  max-height:10em;
+}
 </style>
