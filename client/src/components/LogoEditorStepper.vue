@@ -21,6 +21,7 @@ const _ = reactive({
 
 const update = async () => {
   const logo = App._.logo;
+  if (!logo || !svg_container.value) return;
 
   const invalid_image_masks = [
     [1, 1, 1, 1],
@@ -29,6 +30,8 @@ const update = async () => {
   ];
 
   _.valid = !invalid_image_masks.some(a => App.arraysAreEqual(a, logo.wm));
+
+  await nextTick();
 
   const svg = svg_container.value;
   SvgRenderer.fromLogo(logo, svg);
@@ -77,7 +80,7 @@ const update = async () => {
 };
 
 const updateSync = async () => {
-  console.log('flush');
+  if (!App._.logo) return;
   await App.LogoService.updateLogo(App._.logo);
 };
 
@@ -189,7 +192,7 @@ const setPictorial = async c => {
   <!-- {{_}} -->
   <div>
     <div class="logo_container" style="text-align: center">
-      <svg ref="svg_container" />
+      <svg ref="svg_container" style="border: 1px solid #ccc" />
     </div>
 
     <!-- <q-checkbox v-model="App._.minified" label="Mini" /> -->
@@ -199,7 +202,7 @@ const setPictorial = async c => {
       ref="stepper"
       color="primary"
       animated
-      style="padding: 0 0 2em 0; margin-bottom: 2em"
+      style="margin: 0; padding-bottom: 2em"
       :contracted="$q.screen.width < 700"
     >
       <q-step :name="1" title="Templates" icon="sym_o_lists" active-icon="sym_o_lists" style="overflow: hidden">
@@ -209,7 +212,7 @@ const setPictorial = async c => {
         </div>
 
         <div style="max-width: 40em; margin: 0 auto">
-          <div class="compact">
+          <div class="compact compact_list">
             <svg v-for="t in App._.templates" :ref="el => test(t, el)" @click="() => setTemplate(t)" />
           </div>
         </div>
@@ -292,15 +295,13 @@ const setPictorial = async c => {
         </div>
       </q-step>
 
-      <q-step :name="6" title="Finalize" icon="download" active-icon="download" style="overflow: hidden">
-        <div style="text-align: center; font-weight: bold; font-size: 1.5em">Finalize</div>
-        <div style="text-align: center; padding-bottom: 2em">
-          Generate your logo and download it as SVG or PNG, or embed it via a generated URL.
-        </div>
+      <q-step :name="6" title="Download" icon="download" active-icon="download" style="overflow: hidden">
+        <!-- <div style="text-align: center; font-weight: bold; font-size: 1.5em">Download</div> -->
+        <div style="text-align: center; padding-bottom: 2em">Download your logo as an SVG file.</div>
 
         <div style="text-align: center">
           <!-- <q-btn color='primary' label='Generate Logo' icon='sym_o_manufacturing' /> -->
-          <q-btn color="primary" label="Generate Logo" icon="settings" />
+          <q-btn color="primary" label="Download" icon="download" @click="() => App.download(App._.logo)" />
         </div>
       </q-step>
     </q-stepper>
@@ -328,6 +329,11 @@ const setPictorial = async c => {
   justify-content: center;
 }
 
+.compact_list {
+  flex-direction: column;
+  align-items: center;
+}
+
 .compact svg {
   max-height: 10em;
   border: 0.1em solid #000;
@@ -341,6 +347,6 @@ const setPictorial = async c => {
 }
 
 .selected {
-  border-style: dashed !important;
+  border: 5px solid var(--q-primary) !important;
 }
 </style>

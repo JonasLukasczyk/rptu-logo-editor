@@ -3,6 +3,8 @@ import { reactive, nextTick } from 'vue';
 import { io } from 'socket.io-client';
 import $ from './Constants.js';
 
+import SvgRenderer from './SvgRenderer.js';
+
 const App = {
   _: reactive({
     connected: false,
@@ -34,6 +36,32 @@ const App = {
   },
 
   wait: time => new Promise(resolve => setTimeout(resolve, time)),
+
+  download: async logo => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    document.body.appendChild(svg);
+
+    await SvgRenderer.fromLogo(logo, svg, true);
+    await nextTick();
+
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+
+    // Create a Blob from the string
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+
+    // Create a temporary download link
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = logo.id + '.svg';
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    document.body.removeChild(svg);
+  },
 };
 
 App.io.on('connect', async () => {
@@ -98,7 +126,7 @@ App.io.a_emit = (name, params) => {
     subcaption0: 'Prof. Dr. Laura Muster',
     subcaption1: '',
     logo: null,
-    external: false
+    external: false,
   };
 
   App._.templates.push({
@@ -118,7 +146,7 @@ App.io.a_emit = (name, params) => {
     t_color: '#000000',
     b_color: '#ffffff',
     show_rptu_text: false,
-    co_branding: [App.clone(partner),App.clone(partner)],
+    co_branding: [App.clone(partner), App.clone(partner)],
   });
 }
 

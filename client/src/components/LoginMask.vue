@@ -17,28 +17,39 @@ const _ = reactive({
       email: 'alice@rptu.de',
     },
   ],
+  name: '',
+  password: '',
 });
+
+const login = () => {
+  let user = _.users.find(i => i.name === _.name);
+  if (!user) user = _.users[0];
+
+  App._.user = user;
+};
 </script>
 
 <template>
-  <h3>LOGIN</h3>
+  <div>
+    <q-card flat style="margin: 3em auto 0 auto; max-width: 30em; padding: 1em">
+      <q-card-section>
+        <!-- <div style="font-weight: bold; font-size: 2em; text-align: center">Login</div> -->
+        <!-- <br /> -->
+        <q-input v-model="_.name" label="Username" filled outlined />
+        <br />
+        <q-input v-model="_.password" type="password" label="Password" filled outlined />
+        <br />
 
-  <q-list dense>
-    <q-item v-for="user in _.users" clickable v-ripple @click='()=>App._.user=user'>
-      <q-item-section avatar>
-        <q-avatar color="primary" text-color="white">
-          {{ user.name[0] }}
-        </q-avatar>
-      </q-item-section>
+        <!-- <q-separator /> -->
 
-      <q-item-section>
-        <q-item-label>{{ user.name }}</q-item-label>
-        <q-item-label caption lines="1">{{
-          user.email
-        }}</q-item-label>
-      </q-item-section>
-    </q-item>
-  </q-list>
+        <q-card-actions align="center">
+          <q-btn class="bg-primary text-white" @click="login" :disabled="!_.name">Login</q-btn>
+        </q-card-actions>
+      </q-card-section>
+    </q-card>
+
+    <div style="text-align: center; padding: 1.5em">Example Users (no password): Admin, Bob, Alice</div>
+  </div>
 </template>
 
 <style scoped></style>

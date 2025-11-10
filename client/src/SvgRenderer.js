@@ -9,20 +9,17 @@ const SvgRenderer = {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
   },
 
-  addStyle: svg => {
+  addStyle: (svg, addFont) => {
     const style = SvgRenderer.newElement('style');
     style.setAttribute('type', 'text/css');
-    // style.textContent = `
-    //   @font-face {
-    //     font-family: 'RedHat';
-    //     src: url('data:font/woff2;base64,${red_hat_font_b64}') format('woff2');
-    //   }
-    //
-    //   text {
-    //     font-family: 'RedHat';
-    //   }
-    // `;
-    style.textContent = `
+    if (addFont)
+      style.textContent += `
+        @font-face {
+          font-family: 'RedHat';
+          src: url('data:font/woff2;base64,${red_hat_font_b64}') format('woff2');
+        }
+      `;
+    style.textContent += `
         text {
           font-family: 'RedHat';
         }
@@ -30,13 +27,13 @@ const SvgRenderer = {
     svg.insertBefore(style, svg.firstChild);
   },
 
-  fromLogo: async (logo, svg) => {
+  fromLogo: async (logo, svg, addFont) => {
     if (!svg) {
       svg = SvgRenderer.newElement('svg');
-      SvgRenderer.addStyle(svg);
+      SvgRenderer.addStyle(svg, addFont);
       svg.appendChild(SvgRenderer.newElement('g'));
     } else if (svg.children.length === 0) {
-      SvgRenderer.addStyle(svg);
+      SvgRenderer.addStyle(svg, addFont);
       svg.appendChild(SvgRenderer.newElement('g'));
     } else {
       svg.children[1].innerHTML = '';
@@ -184,7 +181,7 @@ const SvgRenderer = {
     }
 
     const logo_padding = $.gl;
-    const height = 3*$.gl+2*$.gs;
+    const height = 3 * $.gl + 2 * $.gs;
     // const width = 530;
     await nextTick();
     const width = fg.getBBox().width;

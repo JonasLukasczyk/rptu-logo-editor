@@ -5,7 +5,7 @@ import { useQuasar } from 'quasar';
 const $q = useQuasar();
 // $q.dark.set(true);
 
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, computed } from 'vue';
 import LoginMask from './components/LoginMask.vue';
 import LogoList from './components/LogoList.vue';
 import LogoEditor from './components/LogoEditor.vue';
@@ -16,6 +16,10 @@ import RedHatB64 from './assets/red-hat-display-v21-latin-regular.js';
 const _ = reactive({
   leftDrawerOpen: false,
   rightDrawerOpen: false,
+});
+
+const ui_state = computed({
+  get: () => (App._.user === null ? 'login' : App._.logo === null ? 'logo_list' : 'logo_editor'),
 });
 
 onMounted(() => {
@@ -37,41 +41,62 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-layout view="hHh LpR fFf">
-    <q-header class="bg-primary text-white">
-      <!-- <span style='text-align:center; font-size:16px;'>RPTU Logo Generator</span> -->
-    </q-header>
+  <q-card class="bg-white" style="max-width: 50em; margin: 0 auto">
+    <q-card-section class="bg-primary text-white" style="padding: 0em 0.5em">
+      <div class="row items-center no-wrap">
+        <div class="col">
+          <div class="text-h6">Logo Generator</div>
+        </div>
 
-    <!-- <q-drawer -->
-    <!--   show-if-above -->
-    <!--   v-model="_.leftDrawerOpen" -->
-    <!--   side="left" -->
-    <!--   bordered -->
-    <!-- > -->
-    <!--   <SideMenu /> -->
-    <!-- </q-drawer> -->
-    <!---->
-    <!-- <q-drawer -->
-    <!--   show-if-above -->
-    <!--   v-model="_.rightDrawerOpen" -->
-    <!--   side="right" -->
-    <!--   bordered -->
-    <!-- > -->
-    <!-- </q-drawer> -->
-
-    <q-page-container>
-      <div style="max-width: 50em; margin: 0 auto">
-        <LoginMask v-if="App._.user === null" />
-        <LogoList v-else-if="App._.logo === null" />
-        <LogoEditorStepper v-else />
+        <div class="col-auto" v-if="App._.user">
+          <q-btn
+            flat
+            @click="
+              () => {
+                App._.user = null;
+                App._.logo = null;
+              }
+            "
+          >
+            <div class="row items-center no-wrap">
+              <div class="text-center" style="padding-top: 0.2em">{{ App._.user.email }}</div>
+              <q-icon right name="logout" />
+            </div>
+          </q-btn>
+        </div>
       </div>
-    </q-page-container>
-  </q-layout>
+    </q-card-section>
+    <q-card-section style="padding: 0">
+      <q-carousel
+        v-model="ui_state"
+        class="my_carousel"
+        transition-prev="slide-right"
+        transition-next="slide-left"
+        animated
+        style="height: auto; padding: 0; border-radius: 1em"
+        flat
+      >
+        <q-carousel-slide name="login">
+          <LoginMask />
+        </q-carousel-slide>
+        <q-carousel-slide name="logo_list" style="">
+          <LogoList />
+        </q-carousel-slide>
+        <q-carousel-slide name="logo_editor" style="padding: 0">
+          <LogoEditorStepper />
+        </q-carousel-slide>
+      </q-carousel>
+    </q-card-section>
+  </q-card>
 </template>
 
 <style>
 body {
   background-color: #e0e0e0;
+}
+
+.my_carousel > .q-carousel__slides-container > .scroll {
+  overflow: hidden !important;
 }
 
 @font-face {
