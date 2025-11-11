@@ -189,13 +189,11 @@ const setPictorial = async c => {
 </script>
 
 <template>
-  <!-- {{_}} -->
   <div>
-    <div class="logo_container" style="text-align: center">
-      <svg ref="svg_container" style="border: 1px solid #ccc" />
+    <div class="logo_container bg-strips" style="text-align: center">
+      <svg ref="svg_container" />
     </div>
 
-    <!-- <q-checkbox v-model="App._.minified" label="Mini" /> -->
     <q-stepper
       v-model="_.step"
       header-nav
@@ -278,10 +276,7 @@ const setPictorial = async c => {
         </q-card>
 
         <q-btn color="primary" style="display: block; margin: 0 auto" label="Add Partner" @click="addPartner" />
-        <!-- <q-input label='title0' v-model='App._.logo.internal' /> -->
       </q-step>
-
-      <!-- <q-step :name="4" title="External" icon="add_box"> TODO </q-step> -->
 
       <q-step :name="5" title="Colors" icon="palette" active-icon="palette">
         <div style="text-align: center; font-weight: bold; font-size: 1.5em">Color Theme</div>
@@ -300,7 +295,6 @@ const setPictorial = async c => {
         <div style="text-align: center; padding-bottom: 2em">Download your logo as an SVG file.</div>
 
         <div style="text-align: center">
-          <!-- <q-btn color='primary' label='Generate Logo' icon='sym_o_manufacturing' /> -->
           <q-btn color="primary" label="Download" icon="download" @click="() => App.download(App._.logo)" />
         </div>
       </q-step>

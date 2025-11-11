@@ -45,6 +45,7 @@ const LogoService = {
       b_color: '#ffffff',
       show_rptu_text: true,
       co_branding: [],
+      verified: false,
     };
     await LogoService.dbRun(`INSERT INTO logos ('id','time','email','data') VALUES (?,?,?,?)`, [
       logo.id,
@@ -55,11 +56,15 @@ const LogoService = {
     return logo;
   },
 
+  deleteLogo: async id => {
+    await LogoService.dbRun(`DELETE FROM logos WHERE id=?`, [id]);
+  },
+
   getLogos: async user => {
-    const data = await LogoService.dbAll(`SELECT data FROM logos WHERE email=?`, [
-      user.email,
-    ]);
-    return data.map(i=>JSON.parse(i.data));
+    let data = null;
+    if (user.email === 'admin@rptu.de') data = await LogoService.dbAll(`SELECT data FROM logos`, []);
+    else data = await LogoService.dbAll(`SELECT data FROM logos WHERE email=?`, [user.email]);
+    return data.map(i => JSON.parse(i.data));
   },
 
   createLogoTable: async () => {
@@ -92,7 +97,7 @@ const LogoService = {
       }
     });
 
-    await LogoService.dropLogoTable();
+    // await LogoService.dropLogoTable();
     await LogoService.createLogoTable();
   },
 };

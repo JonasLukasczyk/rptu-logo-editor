@@ -41,15 +41,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-card class="bg-white" style="max-width: 50em; margin: 0 auto">
-    <q-card-section class="bg-primary text-white" style="padding: 0em 0.5em">
-      <div class="row items-center no-wrap">
-        <div class="col">
-          <div class="text-h6">Logo Generator</div>
+  <q-card style="max-width: 50em; margin: 0 auto; border-radius: 0">
+    <q-card-section
+      :class="App._.connected ? 'bg-primary' : 'bg-red-7'"
+      class="bg-primary text-white"
+      style="padding: 0em 0.5em"
+    >
+      <div style="display: flex; width: 100%; justify-content: space-between">
+        <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
+          Logo Generator
         </div>
-
-        <div class="col-auto" v-if="App._.user">
+        <div style="flex: 1; text-align: center">
           <q-btn
+            v-if="App._.logo"
+            flat
+            @click="
+              () => {
+                App._.logo = null;
+              }
+            "
+          >
+            <div class="row items-center no-wrap">
+              <q-icon left name="menu" />
+              <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">Logos</div>
+            </div>
+          </q-btn>
+        </div>
+        <div style="flex: 1; text-align: right">
+          <q-btn
+            v-if="App._.user"
             flat
             @click="
               () => {
@@ -59,7 +79,9 @@ onMounted(() => {
             "
           >
             <div class="row items-center no-wrap">
-              <div class="text-center" style="padding-top: 0.2em">{{ App._.user.email }}</div>
+              <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">
+                {{ App._.user.email }}
+              </div>
               <q-icon right name="logout" />
             </div>
           </q-btn>
@@ -73,7 +95,7 @@ onMounted(() => {
         transition-prev="slide-right"
         transition-next="slide-left"
         animated
-        style="height: auto; padding: 0; border-radius: 1em"
+        style="height: auto; padding: 0"
         flat
       >
         <q-carousel-slide name="login">
@@ -91,6 +113,14 @@ onMounted(() => {
 </template>
 
 <style>
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 1,
+    /* <— makes it filled */ 'wght' 400,
+    'GRAD' 0,
+    'opsz' 48;
+}
+
 body {
   background-color: #e0e0e0;
 }
@@ -107,5 +137,22 @@ body {
 
 .text-red-hat {
   font-family: 'RedHat', sans-serif;
+}
+
+:root {
+  --stripe-angle: -45deg;
+  --stripe-size: 20px;
+  --stripe-color1: #d2d2d2;
+  --stripe-color2: #c2c2c2;
+}
+
+.bg-strips {
+  background: repeating-linear-gradient(
+    var(--stripe-angle),
+    var(--stripe-color1),
+    var(--stripe-color1) var(--stripe-size),
+    var(--stripe-color2) var(--stripe-size),
+    var(--stripe-color2) calc(var(--stripe-size) * 2)
+  );
 }
 </style>
