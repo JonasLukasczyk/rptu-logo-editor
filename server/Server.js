@@ -4,6 +4,9 @@ import https from 'https';
 import express from 'express';
 import { Server as IOServer } from 'socket.io';
 
+const IP = '131.246.17.103';
+const PORT = 3000;
+
 const Server = {
   services: new Map(),
 
@@ -18,9 +21,10 @@ const Server = {
     ),
 
   init: async services => {
+    return;
     Server.io = new IOServer(Server.server, {
       cors: {
-        origin: 'http://localhost:5173',
+        origin: `http://${IP}:${PORT}`,
         methods: ['GET', 'POST'],
       },
       maxHttpBufferSize: 20 * 1024 * 1024,
@@ -51,11 +55,11 @@ const Server = {
     Server.app = express();
     Server.server = http.Server(Server.app);
 
-    // Server.app.use(express.static(path.resolve(process.cwd(),'../dist')));
+    Server.app.use(express.static('./dist'));
+    console.log(path.resolve(process.cwd(),'./dist'));
 
-    const port = 4000;
-    const res = await Server.server.listen(port);
-    console.log('listening *:' + port);
+    const res = await Server.server.listen(PORT);
+    console.log('listening *:' + PORT);
   },
 };
 
