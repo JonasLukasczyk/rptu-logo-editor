@@ -14,7 +14,7 @@ const App = {
     templates: [],
   }),
 
-  io: io(':3004', { maxHttpBufferSize: 20 * 1024 * 1024 }),
+  io: io(':3000', { maxHttpBufferSize: 20 * 1024 * 1024 }),
 
   arraysAreEqual: (a, b) => {
     for (let i = 0; i < a.length; i++) {

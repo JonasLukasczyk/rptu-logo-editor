@@ -41,7 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-card style="max-width: 50em; margin: 0 auto; border-radius: 0">
+  <q-card style="max-width: 50em; margin: 2em auto 2em auto; border-radius: 0.5em">
     <q-card-section
       :class="App._.connected ? 'bg-primary' : 'bg-red-7'"
       class="bg-primary text-white"
@@ -88,14 +88,14 @@ onMounted(() => {
         </div>
       </div>
     </q-card-section>
-    <q-card-section style="padding: 0">
+    <q-card-section style="padding: 0;">
       <q-carousel
         v-model="ui_state"
         class="my_carousel"
         transition-prev="slide-right"
         transition-next="slide-left"
         animated
-        style="height: auto; padding: 0"
+        style="height: auto; padding: 0; border-radius: 0 0 1em 1em"
         flat
       >
         <q-carousel-slide name="login">

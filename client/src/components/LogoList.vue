@@ -10,6 +10,7 @@ const _ = reactive({
 });
 
 const init = async () => {
+  console.log('init');
   _.logos = await App.LogoService.getLogos(App._.user);
 };
 
