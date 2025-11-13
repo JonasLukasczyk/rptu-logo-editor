@@ -24,7 +24,7 @@ const Server = {
   init: async services => {
     Server.io = new IOServer(Server.server, {
       cors: {
-        origin: `http://${IP}:${5173}`,
+        origin: `http://${IP}:${PORT}`,
         methods: ['GET', 'POST'],
       },
       maxHttpBufferSize: 20 * 1024 * 1024,
