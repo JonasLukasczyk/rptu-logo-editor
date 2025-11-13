@@ -37,30 +37,80 @@ const App = {
 
   wait: time => new Promise(resolve => setTimeout(resolve, time)),
 
-  download: async logo => {
+  logoToSvg: async logo => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(svg);
-
     await SvgRenderer.fromLogo(logo, svg, true);
-    await nextTick();
+    document.body.removeChild(svg);
+    return svg;
+  },
 
+  toBlob: svg => {
     const serializer = new XMLSerializer();
+
+    if (!svg.hasAttribute('xmlns')) svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    if (!svg.hasAttribute('xmlns:xlink')) svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
     const svgString = serializer.serializeToString(svg);
+    return new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  },
 
-    // Create a Blob from the string
-    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  blobToPng: (blob, width, height, toBlob) => {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
 
-    // Create a temporary download link
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        if (toBlob) {
+          canvas.toBlob(blob => {
+            URL.revokeObjectURL(url);
+            resolve(blob);
+          }, 'image/png');
+        } else {
+          const pngDataUrl = canvas.toDataURL('image/png');
+          URL.revokeObjectURL(url);
+          resolve(pngDataUrl);
+        }
+      };
+
+      img.onerror = e => reject(e);
+      img.src = url;
+    });
+  },
+
+  download: async (name, blob) => {
+    console.log(name, blob);
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = logo.id + '.svg';
-
-    // Trigger download
+    link.download = name;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-    document.body.removeChild(svg);
+    setTimeout(() => {
+      URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+    }, 100);
+  },
+
+  downloadMaster: async (logo, svgFormat) => {
+    const svg = await App.logoToSvg(logo);
+    const blob = App.toBlob(svg);
+    let exportBlob = blob;
+    if (!svgFormat) {
+      const box = svg.viewBox.baseVal;
+      const width = box.width - box.x;
+      const height = box.height - box.y;
+      const scale = 2;
+      exportBlob = await App.blobToPng(blob, scale * width, scale * height, true);
+    }
+    App.download(logo.id + (svgFormat ? '.svg' : '.png'), exportBlob);
   },
 };
 

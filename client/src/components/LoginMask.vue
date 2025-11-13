@@ -43,7 +43,7 @@ const login = () => {
         <!-- <q-separator /> -->
 
         <q-card-actions align="center">
-          <q-btn class="bg-primary text-white" @click="login" :disabled="!_.name">Login</q-btn>
+          <q-btn class="bg-primary text-white" @click="login">Login</q-btn>
         </q-card-actions>
       </q-card-section>
     </q-card>

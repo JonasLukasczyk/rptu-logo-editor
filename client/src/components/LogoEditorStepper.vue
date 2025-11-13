@@ -254,7 +254,7 @@ const setPictorial = async c => {
               <template v-for="i of [0, 1]">
                 <q-input
                   :placeholder="`${g} Row ${i + 1} ${i === 1 ? '(Optional)' : ''}`"
-                  v-if="!partner.external || (g === 'Caption' && i === 0)"
+                  v-if="!(g === 'Subcaption' && i === 1) || partner.caption1"
                   v-model="partner[g.toLowerCase() + i]"
                   dense
                   :input-style="partner[g.toLowerCase() + i] === '' ? 'color:#aaa;' : ''"
@@ -292,10 +292,12 @@ const setPictorial = async c => {
 
       <q-step :name="6" title="Download" icon="download" active-icon="download" style="overflow: hidden">
         <!-- <div style="text-align: center; font-weight: bold; font-size: 1.5em">Download</div> -->
-        <div style="text-align: center; padding-bottom: 2em">Download your logo as an SVG file.</div>
+        <div style="text-align: center; padding-bottom: 2em">Download your logo as an SVG or PNG file.</div>
 
         <div style="text-align: center">
-          <q-btn color="primary" label="Download" icon="download" @click="() => App.download(App._.logo)" />
+          <q-btn color="primary" label="SVG" icon="download" @click="() => App.downloadMaster(App._.logo, true)" />
+          &nbsp;
+          <q-btn color="primary" label="PNG" icon="download" @click="() => App.downloadMaster(App._.logo, false)" />
         </div>
       </q-step>
     </q-stepper>

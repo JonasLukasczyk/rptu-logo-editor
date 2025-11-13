@@ -29,6 +29,7 @@ const newLogo = async () => {
   App._.logo = await App.LogoService.newLogo(App._.user);
 };
 onMounted(init);
+
 </script>
 
 <template>
@@ -67,6 +68,7 @@ onMounted(init);
               </div>
               <div class="col-auto">
                 <q-btn
+                  v-if="false"
                   round
                   flat
                   :class="logo.verified ? 'text-green-6' : 'text-red-9'"
@@ -76,7 +78,18 @@ onMounted(init);
                 />
                 <q-btn round flat class="text-grey-9" icon="delete" dense @click="() => deleteLogo(logo)" />
                 <q-btn round flat class="text-grey-9" icon="edit_document" dense @click="() => (App._.logo = logo)" />
-                <q-btn round flat class="text-grey-9" icon="download" dense @click="() => App.download(logo)" />
+                <q-btn round flat class="text-grey-9" icon="download" dense>
+                  <q-menu>
+                    <q-list dense>
+                      <q-item clickable v-close-popup @click='()=>App.downloadMaster(logo,true)'>
+                        <q-item-section>SVG</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup @click='()=>App.downloadMaster(logo,false)'>
+                        <q-item-section>PNG</q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
               </div>
             </div>
           </q-card-section>

@@ -7,6 +7,7 @@ import { Server as IOServer } from 'socket.io';
 // const IP = '131.246.17.103';
 const IP = 'localhost';
 const PORT = 3000;
+// const PORT_2 = 5173;
 
 const Server = {
   services: new Map(),
@@ -23,10 +24,10 @@ const Server = {
 
   init: async services => {
     Server.io = new IOServer(Server.server, {
-      cors: {
-        origin: `http://${IP}:${PORT}`,
-        methods: ['GET', 'POST'],
-      },
+      // cors: {
+      //   origin: `http://${IP}:${PORT_2}`,
+      //   methods: ['GET', 'POST'],
+      // },
       maxHttpBufferSize: 20 * 1024 * 1024,
     });
 

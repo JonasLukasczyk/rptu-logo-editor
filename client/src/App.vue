@@ -41,7 +41,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-card style="max-width: 50em; margin: 2em auto 2em auto; border-radius: 0.5em">
+  <q-card :style="
+    $q.screen.width > 700
+    ? `max-width: 50em; margin: 2em auto 2em auto; border-radius: 0.5em`
+    : `max-width: 50em; margin: 0 auto 0 auto; border-radius: 0`
+    ">
     <q-card-section
       :class="App._.connected ? 'bg-primary' : 'bg-red-7'"
       class="bg-primary text-white"
