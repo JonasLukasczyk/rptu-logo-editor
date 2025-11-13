@@ -173,13 +173,14 @@ const SvgRenderer = {
         e.setAttribute('href', sublogo);
         iElement.appendChild(e);
 
-        // wait until rendered
-        for(let i=0; i<100; i++){
-          await wait(10);
-          const w = e.getBBox().width;
-          if(w>10) break;
-        }
-        e.setAttribute('width', e.getBBox().width);
+        setTimeout(async () => {
+          for (let i = 0; i < 100; i++) {
+            await wait(10);
+            const w = e.getBBox().width;
+            if (w > 10) break;
+          }
+          e.setAttribute('width', e.getBBox().width);
+        }, 10);
       }
 
       await nextTick();
