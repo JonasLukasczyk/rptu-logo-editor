@@ -4,6 +4,8 @@ import red_hat_font_b64 from './assets/red-hat-display-v21-latin-regular.js';
 
 import default_sub_logo from './assets/default_sub_logo.js';
 
+const wait = time => new Promise(resolve => setTimeout(resolve, time));
+
 const SvgRenderer = {
   newElement: tag => {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -39,15 +41,11 @@ const SvgRenderer = {
       svg.children[1].innerHTML = '';
     }
 
-    await nextTick();
-
     let X = 0;
 
     const root = svg.children[1];
     const bg = root.appendChild(SvgRenderer.newElement('g'));
     const fg = root.appendChild(SvgRenderer.newElement('g'));
-
-    await nextTick();
 
     // Letters
     const letters = ['R', 'P', 'T', 'U'];
@@ -62,8 +60,6 @@ const SvgRenderer = {
       fg.appendChild(path);
     }
 
-    await nextTick();
-
     X = 4 * $.gl;
 
     if (logo.show_rptu_text) {
@@ -77,8 +73,6 @@ const SvgRenderer = {
         path0.setAttribute('transform', `translate(${X},${y})`);
         fg.appendChild(path0);
       }
-
-      await nextTick();
 
       {
         path1 = SvgRenderer.newElement('path');
@@ -179,7 +173,12 @@ const SvgRenderer = {
         e.setAttribute('href', sublogo);
         iElement.appendChild(e);
 
-        await nextTick();
+        // wait until rendered
+        for(let i=0; i<100; i++){
+          await wait(10);
+          const w = e.getBBox().width;
+          if(w>10) break;
+        }
         e.setAttribute('width', e.getBBox().width);
       }
 

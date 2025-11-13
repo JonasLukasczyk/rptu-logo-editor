@@ -55,7 +55,7 @@ const Server = {
 
     Server.app.use(express.static('../dist'));
 
-    const res = await Server.server.listen(PORT);
+    const res = await Server.server.listen(PORT,'127.0.0.1');
     console.log('listening *:' + PORT);
   },
 };
