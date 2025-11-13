@@ -104,7 +104,7 @@ const setTemplate = async template => {
   const clone = App.clone(template);
   const logo = App._.logo;
   for (let key of ['wm', 'show_rptu_text', 'co_branding']) logo[key] = clone[key];
-  _.step = 2;
+  // _.step = 2;
 };
 
 const computeSvgFromColor = async (colors, element) => {

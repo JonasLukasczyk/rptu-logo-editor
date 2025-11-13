@@ -39,11 +39,15 @@ const SvgRenderer = {
       svg.children[1].innerHTML = '';
     }
 
+    await nextTick();
+
     let X = 0;
 
     const root = svg.children[1];
     const bg = root.appendChild(SvgRenderer.newElement('g'));
     const fg = root.appendChild(SvgRenderer.newElement('g'));
+
+    await nextTick();
 
     // Letters
     const letters = ['R', 'P', 'T', 'U'];
@@ -58,6 +62,8 @@ const SvgRenderer = {
       fg.appendChild(path);
     }
 
+    await nextTick();
+
     X = 4 * $.gl;
 
     if (logo.show_rptu_text) {
@@ -71,6 +77,8 @@ const SvgRenderer = {
         path0.setAttribute('transform', `translate(${X},${y})`);
         fg.appendChild(path0);
       }
+
+      await nextTick();
 
       {
         path1 = SvgRenderer.newElement('path');
