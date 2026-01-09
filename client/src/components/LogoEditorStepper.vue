@@ -13,6 +13,9 @@ import default_sub_logo from '../assets/default_sub_logo.js';
 const svg_container = ref(null);
 const $q = useQuasar();
 
+const refColorFriendly = ref(null);
+const refNotColorFriendly = ref(null);
+
 const _ = reactive({
   grid: false,
   valid: true,
@@ -90,6 +93,10 @@ const init = async () => {
   watch(() => _.grid, update);
   watch(() => App._.logo, update, { deep: true });
   watch(() => App._.logo, App.debounce(updateSync, 1000), { deep: true });
+  // watch(()=>_.step, ()=>{
+  //   if(_.step===5)
+  //     computeColorTemplates();
+  // })
   update();
 };
 
@@ -107,14 +114,27 @@ const setTemplate = async template => {
   // _.step = 2;
 };
 
-const computeSvgFromColor = async (colors, element) => {
-  if (!element) return;
-  const logo = App.clone(App._.logo);
-  logo.b_color = colors[0];
-  logo.t_color = colors[1];
+const computeColorTemplates = async (container,colorFriendly) => {
+  if (!container) return;
 
-  await nextTick();
-  SvgRenderer.fromLogo(logo, element);
+  container.innerHTML = '';
+
+  const svg = container.appendChild(SvgRenderer.newElement('svg'));
+  const logo = App.clone(App._.logo);
+  logo.b_color = '#XXXXXX';
+  logo.t_color = '#YYYYYY';
+  await SvgRenderer.fromLogo(logo, svg);
+  svg.remove();
+
+  for (let pairs of $.colors)
+    for (let pair of pairs) {
+      if(pair[2]!==colorFriendly) continue;
+      const newSvg = container.appendChild(SvgRenderer.newElement('svg'));
+      newSvg.setAttribute('viewBox', svg.getAttribute('viewBox'));
+      newSvg.innerHTML = svg.innerHTML.replaceAll('#XXXXXX', pair[0]);
+      newSvg.innerHTML = newSvg.innerHTML.replaceAll('#YYYYYY', pair[1]);
+      newSvg.addEventListener('click', () => setColor(pair));
+    }
 };
 
 const setColor = colors => {
@@ -198,7 +218,6 @@ const setPictorial = async c => {
       v-model="_.step"
       header-nav
       ref="stepper"
-      color="primary"
       animated
       style="margin: 0; padding-bottom: 2em"
       :contracted="$q.screen.width < 700"
@@ -222,7 +241,12 @@ const setPictorial = async c => {
           Choose any of the templates below to start creating your logo.
         </div>
         <div style="text-align: center; padding: 0 0 1em 0">
-          <q-checkbox v-model="App._.logo.show_rptu_text" label="Show Wordmark" style="margin: 0 auto" />
+          <q-checkbox
+            v-model="App._.logo.show_rptu_text"
+            color="secondary"
+            label="Show Wordmark"
+            style="margin: 0 auto"
+          />
         </div>
         <div class="compact">
           <svg
@@ -237,45 +261,54 @@ const setPictorial = async c => {
       <q-step :name="3" title="Co-Branding" icon="add_box" active-icon="add_box" style="overflow: hidden">
         <div style="text-align: center; font-weight: bold; font-size: 1.5em">Co-Branding</div>
         <div style="text-align: center; padding-bottom: 2em">Here you can add internal and external partners.</div>
-        <q-card
-          v-for="(partner, i) in App._.logo.co_branding"
-          style="background-color: #fcfcfc; width: 100%; max-width: 25em; margin: 0 auto 2em auto"
-        >
-          <q-btn
-            icon="close"
-            round
-            flat
-            dense
-            style="position: absolute; z-index: 100; right: 0.25em; top: 0.25em; color: #999"
-            @click="() => deletePartner(partner)"
-          />
-          <q-card-section>
-            <template v-for="g of ['Caption', 'Subcaption']">
-              <template v-for="i of [0, 1]">
-                <q-input
-                  :placeholder="`${g} Row ${i + 1} ${i === 1 ? '(Optional)' : ''}`"
-                  v-if="!(g === 'Subcaption' && i === 1) || partner.caption1"
-                  v-model="partner[g.toLowerCase() + i]"
-                  dense
-                  :input-style="partner[g.toLowerCase() + i] === '' ? 'color:#aaa;' : ''"
-                />
-              </template>
-            </template>
-            <br />
-            <img :src="partner.logo" style="display: block; margin: 0.5em auto 0 auto; max-height: 10em" />
+        <div class="compact">
+          <q-card
+            v-for="(partner, i) in App._.logo.co_branding"
+            style="background-color: #fcfcfc; width: 100%; max-width: 25em; margin: 1em"
+          >
             <q-btn
-              label="Set Logo"
-              color="grey-4"
-              class="text-black"
-              style="margin: 0.5em auto; display: block"
+              icon="close"
+              round
+              flat
               dense
-              @click="event => event.srcElement.nextSibling.click()"
+              style="position: absolute; z-index: 100; right: 0.25em; top: 0.25em; color: #999"
+              @click="() => deletePartner(partner)"
             />
-            <input type="file" @change="event => setLogo(event, partner)" accept="image/*" style="display: none" />
-          </q-card-section>
-        </q-card>
+            <q-card-section>
+              <template v-for="g of ['Caption', 'Subcaption']">
+                <template v-for="i of [0, 1]">
+                  <q-input
+                    :placeholder="`${g} Row ${i + 1} ${i === 1 ? '(Optional)' : ''}`"
+                    v-if="!(g === 'Subcaption' && i === 1) || partner.caption1"
+                    v-model="partner[g.toLowerCase() + i]"
+                    dense
+                    :input-style="partner[g.toLowerCase() + i] === '' ? 'color:#aaa;' : ''"
+                  />
+                </template>
+              </template>
+              <br />
+              <img :src="partner.logo" style="display: block; margin: 0.5em auto 0 auto; max-height: 10em" />
+              <q-btn
+                label="Set Logo"
+                color="grey-4"
+                class="text-black"
+                style="margin: 0.5em auto; display: block"
+                icon="image_search"
+                dense
+                @click="event => event.srcElement.nextSibling.click()"
+              />
+              <input type="file" @change="event => setLogo(event, partner)" accept="image/*" style="display: none" />
+            </q-card-section>
+          </q-card>
+        </div>
 
-        <q-btn color="primary" style="display: block; margin: 0 auto" label="Add Partner" @click="addPartner" />
+        <q-btn
+          color="primary"
+          style="display: block; margin: 0 auto"
+          label="Add Partner"
+          @click="addPartner"
+          icon="add_circle"
+        />
       </q-step>
 
       <q-step :name="5" title="Colors" icon="palette" active-icon="palette">
@@ -283,11 +316,26 @@ const setPictorial = async c => {
         <div style="text-align: center; padding-bottom: 2em">
           Click on any logo to adapt the corresponding color theme.
         </div>
-        <div class="compact">
-          <template v-for="(g, i) in $.colors">
-            <svg v-for="(c, j) in g" :ref="el => computeSvgFromColor(c, el)" @click="() => setColor(c)" />
-          </template>
+
+        <div style="text-align: center; font-weight: bold; font-size: 1.5em">
+          <q-icon name="visibility" style="margin-right: 0.5em" /> Barrierefreie Farbkombinationen
         </div>
+        <div class='compact' :ref="el => computeColorTemplates(el,true)" />
+
+        <div style="text-align: center; font-weight: bold; font-size: 1.5em;margin-top:1em;">
+          <q-icon name="visibility_off" style="margin-right: 0.5em" />Nicht barrierefreie Farbkombinationen
+        </div>
+        <q-banner style="margin: 0 0em">
+          <template v-slot:avatar>
+            <q-icon name="warning" color="primary" />
+          </template>
+          <div style="border-left: 0.1em solid black; padding-left: 1em">
+            Nicht barrierefreie Farbkombinationen sollten für Webanwendungen unbedingt vermieden werden. Für
+            Printprodukte können sie zwar grundsätzlich eingesetzt werden, jedoch sollte auch hier sorgfältig abgewogen
+            werden, ob sie den Anforderungen an gute Lesbarkeit und Zugänglichkeit genügen.
+          </div>
+        </q-banner>
+        <div class='compact' :ref="el => computeColorTemplates(el,false)" />
       </q-step>
 
       <q-step :name="6" title="Download" icon="download" active-icon="download" style="overflow: hidden">
@@ -298,13 +346,15 @@ const setPictorial = async c => {
           <q-btn color="primary" label="SVG" icon="download" @click="() => App.downloadMaster(App._.logo, true)" />
           &nbsp;
           <q-btn color="primary" label="PNG" icon="download" @click="() => App.downloadMaster(App._.logo, false)" />
+          &nbsp;
+          <q-btn color="primary" label="JPG" icon="download" @click="() => App.downloadMaster(App._.logo, false)" />
         </div>
       </q-step>
     </q-stepper>
   </div>
 </template>
 
-<style scoped>
+<style>
 .logo_container {
   zoom: 1;
   padding: 1em;
@@ -343,6 +393,6 @@ const setPictorial = async c => {
 }
 
 .selected {
-  border: 5px solid var(--q-primary) !important;
+  border: 5px solid var(--q-secondary) !important;
 }
 </style>

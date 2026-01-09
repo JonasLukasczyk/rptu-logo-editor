@@ -6,9 +6,27 @@ import default_sub_logo from './assets/default_sub_logo.js';
 
 const wait = time => new Promise(resolve => setTimeout(resolve, time));
 
+const base64Cache = new Map();
+
 const SvgRenderer = {
   newElement: tag => {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
+  },
+
+  base64ToObjectURL: base64 => {
+    const [header, data] = base64.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+
+    const binary = atob(data);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const blob = new Blob([bytes], { type: mime });
+    return URL.createObjectURL(blob);
   },
 
   addStyle: (svg, addFont) => {
@@ -64,27 +82,51 @@ const SvgRenderer = {
 
     if (logo.show_rptu_text) {
       X += $.gs;
-      let path0, path1;
       {
-        path0 = SvgRenderer.newElement('path');
-        path0.setAttribute('d', $.text_rp);
-        const y = $.letter_bb[0] + $.letter_padding;
-        path0.setAttribute('fill', logo.t_color);
-        path0.setAttribute('transform', `translate(${X},${y})`);
-        fg.appendChild(path0);
+        const e = SvgRenderer.newElement('text');
+        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
+        e.setAttribute('y', $.gl + $.gs);
+        e.setAttribute('font-size', '17');
+        e.setAttribute('font-weight', 'bold');
+        e.setAttribute('fill', logo.t_color);
+        e.setAttribute('dominant-baseline', 'hanging');
+        e.textContent = 'Rheinland-Pfälzische';
+        fg.appendChild(e);
+      }
+      {
+        const e = SvgRenderer.newElement('text');
+        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
+        e.setAttribute('y', 2*$.gl + $.gs);
+        e.setAttribute('font-size', '17');
+        e.setAttribute('font-weight', 'bold');
+        e.setAttribute('fill', logo.t_color);
+        e.textContent = 'Technische Universität';
+        fg.appendChild(e);
+
+        await nextTick();
+        X += e.getBBox().width;
       }
 
       {
-        path1 = SvgRenderer.newElement('path');
-        path1.setAttribute('d', $.text_kl);
-        const y = 2 * ($.letter_bb[0] + $.letter_padding);
-        path1.setAttribute('fill', logo.t_color);
-        path1.setAttribute('transform', `translate(${X},${y})`);
-        fg.appendChild(path1);
+        const e = SvgRenderer.newElement('text');
+        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
+        e.setAttribute('y', 2*$.gl + 2*$.gs);
+        e.setAttribute('font-size', '17');
+        e.setAttribute('fill', logo.t_color);
+        e.setAttribute('dominant-baseline', 'hanging');
+        e.textContent = 'Kaiserslautern';
+        fg.appendChild(e);
       }
 
-      await nextTick();
-      X += path0.getBBox().width;
+      {
+        const e = SvgRenderer.newElement('text');
+        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
+        e.setAttribute('y', 3*$.gl + 2*$.gs);
+        e.setAttribute('font-size', '17');
+        e.setAttribute('fill', logo.t_color);
+        e.textContent = 'Landau';
+        fg.appendChild(e);
+      }
     }
 
     if (logo.co_branding.length) {
@@ -170,7 +212,13 @@ const SvgRenderer = {
         e.setAttribute('x', X);
         e.setAttribute('y', y);
         e.setAttribute('height', h);
-        e.setAttribute('href', sublogo);
+
+        let objectUrl = base64Cache.get(sublogo);
+        if(!objectUrl){
+          objectUrl = SvgRenderer.base64ToObjectURL(sublogo);
+          base64Cache.set(sublogo,objectUrl);
+        }
+        e.setAttribute('href', objectUrl);
         iElement.appendChild(e);
 
         setTimeout(async () => {

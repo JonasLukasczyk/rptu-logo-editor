@@ -41,82 +41,102 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-card :style="
-    $q.screen.width > 700
-    ? `max-width: 50em; margin: 2em auto 2em auto; border-radius: 0.5em`
-    : `max-width: 50em; margin: 0 auto 0 auto; border-radius: 0`
-    ">
-    <q-card-section
-      :class="App._.connected ? 'bg-primary' : 'bg-red-7'"
-      class="bg-primary text-white"
-      style="padding: 0em 0.5em"
+  <div>
+    <div
+      class="bg-black text-white"
+      style="padding: 0.2em 0.5em; height: 3em; position: absolute; top: 0; left: 0; right: 0"
     >
-      <div style="display: flex; width: 100%; justify-content: space-between">
-        <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
-          Logo Generator
-        </div>
-        <div style="flex: 1; text-align: center">
-          <q-btn
-            v-if="App._.logo"
-            flat
-            @click="
-              () => {
-                App._.logo = null;
-              }
-            "
-          >
-            <div class="row items-center no-wrap">
-              <q-icon left name="menu" />
-              <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">Logos</div>
-            </div>
-          </q-btn>
-        </div>
-        <div style="flex: 1; text-align: right">
-          <q-btn
-            v-if="App._.user"
-            flat
-            @click="
-              () => {
-                App._.user = null;
-                App._.logo = null;
-              }
-            "
-          >
-            <div class="row items-center no-wrap">
-              <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">
-                {{ App._.user.email }}
+      <div style="max-width: 1200px; margin: 0 auto">
+        <div style="display: flex; width: 100%; justify-content: space-between">
+          <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
+            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" /> Logo Generator
+          </div>
+          <div style="flex: 1; text-align: center">
+            <q-btn
+              v-if="App._.logo"
+              flat
+              @click="
+                () => {
+                  App._.logo = null;
+                }
+              "
+            >
+              <div class="row items-center no-wrap">
+                <q-icon left name="menu" />
+                <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">Logos</div>
               </div>
-              <q-icon right name="logout" />
-            </div>
-          </q-btn>
+            </q-btn>
+          </div>
+          <div style="flex: 1; text-align: right">
+            <q-btn
+                dense
+              v-if="App._.user"
+              flat
+              @click="
+                () => {
+                  App._.user = null;
+                  App._.logo = null;
+                }
+              "
+            >
+              <div class="row items-center no-wrap">
+                <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">
+                  {{ App._.user.email }}
+                </div>
+                <q-icon right name="logout" />
+              </div>
+            </q-btn>
+
+            <q-btn label='DE' dense />
+              |
+            <q-btn label='EN' dense />
+          </div>
         </div>
       </div>
-    </q-card-section>
-    <q-card-section style="padding: 0;">
-      <q-carousel
-        v-model="ui_state"
-        class="my_carousel"
-        transition-prev="slide-right"
-        transition-next="slide-left"
-        animated
-        style="height: auto; padding: 0; border-radius: 0 0 1em 1em"
-        flat
-      >
-        <q-carousel-slide name="login">
-          <LoginMask />
-        </q-carousel-slide>
-        <q-carousel-slide name="logo_list" style="">
-          <LogoList />
-        </q-carousel-slide>
-        <q-carousel-slide name="logo_editor" style="padding: 0">
-          <LogoEditorStepper />
-        </q-carousel-slide>
-      </q-carousel>
-    </q-card-section>
-  </q-card>
+    </div>
+    <div style="padding: 0; position: absolute; top: 3em; bottom: 0; left: 0; right: 0">
+      <div style="height: 100%; overflow-y: scroll">
+        <q-carousel
+          v-model="ui_state"
+          class="my_carousel"
+          transition-prev="slide-right"
+          transition-next="slide-left"
+          animated
+          style="
+            height: auto;
+            padding: 0;
+            border-radius: 0;
+            border: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0;
+          "
+          flat
+        >
+          <q-carousel-slide name="login">
+            <LoginMask />
+          </q-carousel-slide>
+          <q-carousel-slide name="logo_list" style="">
+            <LogoList />
+          </q-carousel-slide>
+          <q-carousel-slide name="logo_editor" style="padding: 0">
+            <LogoEditorStepper />
+          </q-carousel-slide>
+        </q-carousel>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style>
+@font-face {
+  font-family: 'RedHat';
+  src: url('./assets/red-hat-display-v21-latin-regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 .material-symbols-outlined {
   font-variation-settings:
     'FILL' 1,
@@ -126,21 +146,12 @@ onMounted(() => {
 }
 
 body {
+  font-family: 'RedHat', Arial, sans-serif;
   background-color: #e0e0e0;
 }
 
 .my_carousel > .q-carousel__slides-container > .scroll {
   overflow: hidden !important;
-}
-
-@font-face {
-  font-family: 'RedHat';
-  font-weight: 400;
-  font-style: normal;
-}
-
-.text-red-hat {
-  font-family: 'RedHat', sans-serif;
 }
 
 :root {
@@ -158,5 +169,9 @@ body {
     var(--stripe-color2) var(--stripe-size),
     var(--stripe-color2) calc(var(--stripe-size) * 2)
   );
+}
+
+.q-stepper {
+  box-shadow: none;
 }
 </style>
