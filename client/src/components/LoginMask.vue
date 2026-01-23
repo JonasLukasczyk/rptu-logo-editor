@@ -1,5 +1,6 @@
 <script setup>
 import App from '../App.js';
+import t from '../Translator.js';
 import { reactive } from 'vue';
 
 const _ = reactive({
@@ -33,14 +34,10 @@ const login = () => {
   <div>
     <q-card flat style="margin: 3em auto 0 auto; max-width: 30em; padding: 1em">
       <q-card-section>
-        <!-- <div style="font-weight: bold; font-size: 2em; text-align: center">Login</div> -->
-        <!-- <br /> -->
-        <q-input v-model="_.name" label="Username" filled outlined />
+        <q-input v-model="_.name" :label="t(`Username`,`Benutzername`)" filled outlined />
         <br />
-        <q-input v-model="_.password" type="password" label="Password" filled outlined />
+        <q-input v-model="_.password" type="password" :label="t(`Password`,`Passwort`)" filled outlined />
         <br />
-
-        <!-- <q-separator /> -->
 
         <q-card-actions align="center">
           <q-btn class="bg-primary text-white" @click="login">Login</q-btn>

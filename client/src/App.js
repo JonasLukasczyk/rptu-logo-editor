@@ -40,7 +40,7 @@ const App = {
   logoToSvg: async logo => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(svg);
-    await SvgRenderer.fromLogo(logo, svg, true);
+    await SvgRenderer.fromLogo(logo, svg, true, true);
     document.body.removeChild(svg);
     return svg;
   },
@@ -55,7 +55,7 @@ const App = {
     return new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
   },
 
-  blobToPng: (blob, width, height, toBlob) => {
+  blobToRaster: (blob, width, height, toBlob, format = 'png', quality = 0.92) => {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(blob);
       const img = new Image();
@@ -67,19 +67,28 @@ const App = {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
+        const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+
         if (toBlob) {
-          canvas.toBlob(blob => {
-            URL.revokeObjectURL(url);
-            resolve(blob);
-          }, 'image/png');
+          canvas.toBlob(
+            blob => {
+              URL.revokeObjectURL(url);
+              resolve(blob);
+            },
+            mimeType,
+            format === 'jpeg' ? quality : undefined
+          );
         } else {
-          const pngDataUrl = canvas.toDataURL('image/png');
+          const pngDataUrl = canvas.toDataURL(mimeType, format === 'jpeg' ? quality : undefined);
           URL.revokeObjectURL(url);
           resolve(pngDataUrl);
         }
       };
 
-      img.onerror = e => reject(e);
+      img.onerror = e => {
+        reject(e);
+        URL.revokeObjectURL(url);
+      };
       img.src = url;
     });
   },
@@ -97,18 +106,18 @@ const App = {
     }, 100);
   },
 
-  downloadMaster: async (logo, svgFormat) => {
+  downloadMaster: async (logo, format, quality) => {
     const svg = await App.logoToSvg(logo);
     const blob = App.toBlob(svg);
     let exportBlob = blob;
-    if (!svgFormat) {
+    if (format !== 'svg') {
       const box = svg.viewBox.baseVal;
       const width = box.width - box.x;
       const height = box.height - box.y;
       const scale = 2;
-      exportBlob = await App.blobToPng(blob, scale * width, scale * height, true);
+      exportBlob = await App.blobToRaster(blob, scale * width, scale * height, true, format, quality);
     }
-    App.download(logo.id + (svgFormat ? '.svg' : '.png'), exportBlob);
+    App.download(logo.id + '.' + format, exportBlob);
   },
 };
 

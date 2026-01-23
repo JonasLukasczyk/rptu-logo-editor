@@ -1,5 +1,6 @@
 <script setup>
 import App from './App.js';
+import { t, lang } from './Translator.js';
 
 import { useQuasar } from 'quasar';
 const $q = useQuasar();
@@ -49,28 +50,25 @@ onMounted(() => {
       <div style="max-width: 1200px; margin: 0 auto">
         <div style="display: flex; width: 100%; justify-content: space-between">
           <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
-            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" /> Logo Generator
+            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" />Logo Generator
           </div>
-          <div style="flex: 1; text-align: center">
+          <div style="flex: 1; text-align: right">
             <q-btn
               v-if="App._.logo"
               flat
+              dense
+              icon="auto_awesome_motion"
               @click="
                 () => {
                   App._.logo = null;
                 }
               "
-            >
-              <div class="row items-center no-wrap">
-                <q-icon left name="menu" />
-                <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">Logos</div>
-              </div>
-            </q-btn>
-          </div>
-          <div style="flex: 1; text-align: right">
+            />
+
             <q-btn
-                dense
+              dense
               v-if="App._.user"
+              icon="logout"
               flat
               @click="
                 () => {
@@ -78,18 +76,10 @@ onMounted(() => {
                   App._.logo = null;
                 }
               "
-            >
-              <div class="row items-center no-wrap">
-                <div v-if="$q.screen.width > 700" class="text-center" style="padding-top: 0.2em">
-                  {{ App._.user.email }}
-                </div>
-                <q-icon right name="logout" />
-              </div>
-            </q-btn>
-
-            <q-btn label='DE' dense />
-              |
-            <q-btn label='EN' dense />
+            />
+            <q-btn label="DE" :class="lang === 'DE' ? 'text-weight-bolder' : ''" dense @click="() => (lang = 'DE')" />
+            |
+            <q-btn label="EN" :class="lang === 'EN' ? 'text-weight-bolder' : ''" dense @click="() => (lang = 'EN')" />
           </div>
         </div>
       </div>

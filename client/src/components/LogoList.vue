@@ -1,5 +1,6 @@
 <script setup>
 import App from '../App.js';
+import t from '../Translator.js';
 import SvgRenderer from '../SvgRenderer.js';
 import { ref, reactive, onMounted, nextTick } from 'vue';
 
@@ -29,7 +30,6 @@ const newLogo = async () => {
   App._.logo = await App.LogoService.newLogo(App._.user);
 };
 onMounted(init);
-
 </script>
 
 <template>
@@ -43,7 +43,7 @@ onMounted(init);
             <tbody>
               <tr>
                 <td><q-icon name="sym_o_hide_source" size="2em" class="text-grey-5" /></td>
-                <td>No logos associated with current account</td>
+                <td>{{ t(`No logos associated with current account`, `TODO`) }}</td>
               </tr>
             </tbody>
           </table>
@@ -61,9 +61,10 @@ onMounted(init);
             <div class="row items-center no-wrap">
               <div class="col">
                 <q-item-label style="font-weight: bold">ID: {{ logo.id }}</q-item-label>
-                <q-item-label caption lines="1">Owner: {{ logo.user.email }}</q-item-label>
+                <q-item-label caption lines="1">{{ t(`Author`, `Autor`) }}: {{ logo.user.email }}</q-item-label>
                 <q-item-label caption lines="1"
-                  >Date: {{ new Intl.DateTimeFormat('de-DE').format(new Date(logo.time)) }}</q-item-label
+                  >{{ t(`Created`, `Erstellt`) }}:
+                  {{ new Intl.DateTimeFormat('de-DE').format(new Date(logo.time)) }}</q-item-label
                 >
               </div>
               <div class="col-auto">
@@ -81,11 +82,14 @@ onMounted(init);
                 <q-btn round flat class="text-grey-9" icon="download" dense>
                   <q-menu>
                     <q-list dense>
-                      <q-item clickable v-close-popup @click='()=>App.downloadMaster(logo,true)'>
+                      <q-item clickable v-close-popup @click="() => App.downloadMaster(logo, 'svg')">
                         <q-item-section>SVG</q-item-section>
                       </q-item>
-                      <q-item clickable v-close-popup @click='()=>App.downloadMaster(logo,false)'>
+                      <q-item clickable v-close-popup @click="() => App.downloadMaster(logo, 'png')">
                         <q-item-section>PNG</q-item-section>
+                      </q-item>
+                      <q-item clickable v-close-popup @click="() => App.downloadMaster(logo, 'jpeg', 0.98)">
+                        <q-item-section>JPEG</q-item-section>
                       </q-item>
                     </q-list>
                   </q-menu>
@@ -102,7 +106,7 @@ onMounted(init);
     </q-list>
 
     <div style="text-align: center; margin-top: 1em">
-      <q-btn label="New Logo" icon="add_circle" class="bg-primary text-white" @click="newLogo" />
+      <q-btn label="Logo" icon="add_circle" class="bg-primary text-white" @click="newLogo" />
     </div>
   </div>
 </template>

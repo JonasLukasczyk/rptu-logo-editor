@@ -47,7 +47,7 @@ const SvgRenderer = {
     svg.insertBefore(style, svg.firstChild);
   },
 
-  fromLogo: async (logo, svg, addFont) => {
+  fromLogo: async (logo, svg, addFont, rawImages) => {
     if (!svg) {
       svg = SvgRenderer.newElement('svg');
       SvgRenderer.addStyle(svg, addFont);
@@ -84,7 +84,7 @@ const SvgRenderer = {
       X += $.gs;
       {
         const e = SvgRenderer.newElement('text');
-        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
+        e.setAttribute('x', $.letter_bb[0] * 4 + $.gs);
         e.setAttribute('y', $.gl + $.gs);
         e.setAttribute('font-size', '17');
         e.setAttribute('font-weight', 'bold');
@@ -95,8 +95,8 @@ const SvgRenderer = {
       }
       {
         const e = SvgRenderer.newElement('text');
-        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
-        e.setAttribute('y', 2*$.gl + $.gs);
+        e.setAttribute('x', $.letter_bb[0] * 4 + $.gs);
+        e.setAttribute('y', 2 * $.gl + $.gs);
         e.setAttribute('font-size', '17');
         e.setAttribute('font-weight', 'bold');
         e.setAttribute('fill', logo.t_color);
@@ -109,8 +109,8 @@ const SvgRenderer = {
 
       {
         const e = SvgRenderer.newElement('text');
-        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
-        e.setAttribute('y', 2*$.gl + 2*$.gs);
+        e.setAttribute('x', $.letter_bb[0] * 4 + $.gs);
+        e.setAttribute('y', 2 * $.gl + 2 * $.gs);
         e.setAttribute('font-size', '17');
         e.setAttribute('fill', logo.t_color);
         e.setAttribute('dominant-baseline', 'hanging');
@@ -120,8 +120,8 @@ const SvgRenderer = {
 
       {
         const e = SvgRenderer.newElement('text');
-        e.setAttribute('x', $.letter_bb[0] * 4+$.gs);
-        e.setAttribute('y', 3*$.gl + 2*$.gs);
+        e.setAttribute('x', $.letter_bb[0] * 4 + $.gs);
+        e.setAttribute('y', 3 * $.gl + 2 * $.gs);
         e.setAttribute('font-size', '17');
         e.setAttribute('fill', logo.t_color);
         e.textContent = 'Landau';
@@ -213,22 +213,28 @@ const SvgRenderer = {
         e.setAttribute('y', y);
         e.setAttribute('height', h);
 
-        let objectUrl = base64Cache.get(sublogo);
-        if(!objectUrl){
+        let objectUrl = rawImages ? sublogo : base64Cache.get(sublogo);
+        if (!objectUrl) {
           objectUrl = SvgRenderer.base64ToObjectURL(sublogo);
-          base64Cache.set(sublogo,objectUrl);
+          base64Cache.set(sublogo, objectUrl);
         }
         e.setAttribute('href', objectUrl);
         iElement.appendChild(e);
 
-        setTimeout(async () => {
-          for (let i = 0; i < 100; i++) {
-            await wait(10);
-            const w = e.getBBox().width;
-            if (w > 10) break;
-          }
+        const imageLoaded = img =>
+          new Promise((resolve, reject) => {
+            img.addEventListener('load', resolve, { once: true });
+            img.addEventListener('error', reject, { once: true });
+          });
+
+        if (rawImages) {
+          await imageLoaded(e);
           e.setAttribute('width', e.getBBox().width);
-        }, 10);
+        } else {
+          imageLoaded(e).then(() => {
+            e.setAttribute('width', e.getBBox().width);
+          });
+        }
       }
 
       await nextTick();
@@ -238,19 +244,12 @@ const SvgRenderer = {
 
     const logo_padding = $.gl;
     const height = 3 * $.gl + 2 * $.gs;
-    // const width = 530;
     await nextTick();
     const width = fg.getBBox().width;
-    // svg.setAttribute(
-    //   'viewBox',
-    //   `0 -${logo_padding} ${width + 2 * logo_padding} ${height + 2 * logo_padding}`
-    // );
     svg.setAttribute(
       'viewBox',
       `${-logo_padding} ${-logo_padding} ${width + 2 * logo_padding} ${height + 2 * logo_padding}`
     );
-    // svg.setAttribute('width', '100%');
-    // svg.setAttribute('height', '100%');
 
     {
       const i = SvgRenderer.newElement('rect');
@@ -261,32 +260,6 @@ const SvgRenderer = {
       i.setAttribute('fill', logo.b_color);
       bg.appendChild(i);
     }
-
-    // const uni_text = [
-    // 'Rheinland-Pfälzische',
-    // 'Technische Universität',
-    // 'Kaiserslautern-Landau'
-    // ];
-    // const text = SvgRenderer.newElement('text');
-    // text.setAttribute("x", 4*$.letter_bb[0]+$.letter_padding);
-    // text.setAttribute("y", $.letter_bb[0]+$.letter_padding);
-    // text.setAttribute("font-size", "24");
-    // text.setAttribute("text-anchor", "start");
-    // text.setAttribute("dominant-baseline", "hanging");
-    // text.setAttribute("fill", "black");
-    // text.setAttribute("font-family", "Arial");
-    // text.textContent = uni_text[0];
-    // logo_layer.append(text);
-    // {
-    //   const c = SvgRenderer.newElement('circle');
-    //   // c.setAttribute('cx',-logo_padding);
-    //   // c.setAttribute('cy',-logo_padding);
-    //   c.setAttribute('cx',0);
-    //   c.setAttribute('cy',0);
-    //   c.setAttribute('r',2);
-    //   c.setAttribute('fill','red');
-    //   svg.appendChild(c);
-    // }
 
     return svg;
   },
