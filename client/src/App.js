@@ -9,6 +9,7 @@ const App = {
   _: reactive({
     connected: false,
     logo: null,
+    logos: [],
     user: null,
     minified: true,
     templates: [],
@@ -123,7 +124,9 @@ const App = {
 
 App.io.on('connect', async () => {
   // Init Services
+  App._.user = await App.io.a_emit('getUser');
   const services = await App.io.a_emit('getServices');
+
   for (const name in services) {
     const service = {
       listeners: {},
@@ -148,6 +151,17 @@ App.io.on('connect', async () => {
   App._.connected = true;
 });
 App.io.on('disconnect', () => (App._.connected = false));
+App.io.on('logo_deleted', id => {
+  const idx = App._.logos.findIndex(l=>l.id===id);
+  if(idx>=0)
+    App._.logos.splice(idx,1);
+});
+App.io.on('logo_updated', logo => {
+  for (let l of App._.logos)
+    if (l.id === logo.id) {
+      for (let k of Object.keys(logo)) l[k] = logo[k];
+    }
+});
 
 App.io.a_emit = (name, params) => {
   return new Promise((res, rej) => {
@@ -166,6 +180,7 @@ App.io.a_emit = (name, params) => {
     b_color: '#ffffff',
     show_rptu_text: false,
     co_branding: [],
+    external_partners: false,
   });
   App._.templates.push({
     time: Date.now(),
@@ -175,6 +190,7 @@ App.io.a_emit = (name, params) => {
     b_color: '#ffffff',
     show_rptu_text: true,
     co_branding: [],
+    external_partners: false,
   });
 
   const partner = {
@@ -183,7 +199,6 @@ App.io.a_emit = (name, params) => {
     subcaption0: 'Prof. Dr. Laura Muster',
     subcaption1: '',
     logo: null,
-    external: false,
   };
 
   App._.templates.push({
@@ -194,6 +209,7 @@ App.io.a_emit = (name, params) => {
     b_color: '#ffffff',
     show_rptu_text: false,
     co_branding: [App.clone(partner)],
+    external_partners: false,
   });
 
   App._.templates.push({
@@ -204,7 +220,10 @@ App.io.a_emit = (name, params) => {
     b_color: '#ffffff',
     show_rptu_text: false,
     co_branding: [App.clone(partner), App.clone(partner)],
+    external_partners: false,
   });
 }
+
+console.log(App);
 
 export default App;

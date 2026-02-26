@@ -7,20 +7,16 @@ const $q = useQuasar();
 // $q.dark.set(true);
 
 import { reactive, onMounted, computed } from 'vue';
-import LoginMask from './components/LoginMask.vue';
 import LogoList from './components/LogoList.vue';
 import LogoEditor from './components/LogoEditor.vue';
 import LogoEditorStepper from './components/LogoEditorStepper.vue';
 import SideMenu from './components/SideMenu.vue';
 import RedHatB64 from './assets/red-hat-display-v21-latin-regular.js';
 
-const _ = reactive({
-  leftDrawerOpen: false,
-  rightDrawerOpen: false,
-});
+const _ = reactive({});
 
 const ui_state = computed({
-  get: () => (App._.user === null ? 'login' : App._.logo === null ? 'logo_list' : 'logo_editor'),
+  get: () => (!App._.connected ? 'connecting' : App._.logo === null ? 'logo_list' : 'logo_editor'),
 });
 
 onMounted(() => {
@@ -65,18 +61,30 @@ onMounted(() => {
               "
             />
 
-            <q-btn
-              dense
-              v-if="App._.user"
-              icon="logout"
-              flat
-              @click="
-                () => {
-                  App._.user = null;
-                  App._.logo = null;
-                }
-              "
-            />
+            <q-btn flat dense icon="menu">
+              <q-menu anchor="bottom right" self="top right">
+                <q-list style="min-width: 100px" dense>
+                  <q-item clickable v-close-popup @click="">
+                    <q-item-section>Logout</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable v-close-popup @click="() => (lang = 'DE')">
+                    <q-item-section>Deutsch</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="() => (lang = 'EN')">
+                    <q-item-section>English</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable v-close-popup>
+                    <q-item-section>{{ t('Imprint', 'Impressum') }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup>
+                    <q-item-section>{{ t('Data Protection', 'Datenschutz') }}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+
             <q-btn label="DE" :class="lang === 'DE' ? 'text-weight-bolder' : ''" dense @click="() => (lang = 'DE')" />
             |
             <q-btn label="EN" :class="lang === 'EN' ? 'text-weight-bolder' : ''" dense @click="() => (lang = 'EN')" />
@@ -85,27 +93,34 @@ onMounted(() => {
       </div>
     </div>
     <div style="padding: 0; position: absolute; top: 3em; bottom: 0; left: 0; right: 0">
-      <div style="height: 100%; overflow-y: scroll">
+      <div style="height: 100%; overflow-y: scroll; max-width: 1200px; margin: 0 auto">
+        <q-list dense v-if="!App._.connected">
+          <q-item>
+            <q-item-section>
+              <table style="margin: 2em auto">
+                <tbody>
+                  <tr>
+                    <td style="padding-right: 1em">
+                      <q-spinner color="primary" size="3em" :thickness="10" />
+                    </td>
+                    <td>{{ t(`Connecting to Server`, `Verbindung zum Server wird hergestellt`) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
         <q-carousel
+          v-else
           v-model="ui_state"
           class="my_carousel"
           transition-prev="slide-right"
           transition-next="slide-left"
           animated
-          style="
-            height: auto;
-            padding: 0;
-            border-radius: 0;
-            border: 0;
-            max-width: 1200px;
-            margin: 0 auto;
-            box-shadow: 0;
-          "
+          style="height: auto; padding: 0; border-radius: 0; border: 0; box-shadow: 0"
           flat
         >
-          <q-carousel-slide name="login">
-            <LoginMask />
-          </q-carousel-slide>
           <q-carousel-slide name="logo_list" style="">
             <LogoList />
           </q-carousel-slide>
@@ -144,6 +159,14 @@ body {
   overflow: hidden !important;
 }
 
+.q-tooltip {
+  padding: 0.5em 1em;
+  max-width:20em;
+  font-size:1em;
+  background-color:black;
+  color:white;
+}
+
 :root {
   --stripe-angle: -45deg;
   --stripe-size: 20px;
@@ -163,5 +186,31 @@ body {
 
 .q-stepper {
   box-shadow: none;
+}
+
+.fade-out {
+  animation: fadeOut 0.2s ease forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>

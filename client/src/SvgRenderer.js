@@ -160,7 +160,11 @@ const SvgRenderer = {
         e.setAttribute('text-anchor', 'start');
         e.setAttribute('dominant-baseline', 'hanging');
         e.setAttribute('font-weight', 'bold');
-        e.textContent = partner.external ? 'In Kooperation mit' : partner.caption0;
+        e.textContent = logo.external_partners
+          ? logo.co_branding.indexOf(partner) <= 0
+            ? 'In Kooperation mit'
+            : ''
+          : partner.caption0;
         iElement.appendChild(e);
       }
 
@@ -170,14 +174,14 @@ const SvgRenderer = {
         e.setAttribute('x', X);
         e.setAttribute('y', 35);
         e.setAttribute('font-size', '18');
-        if (partner.caption1) e.setAttribute('font-weight', 'bold');
+        if (!logo.external_partners && partner.caption1) e.setAttribute('font-weight', 'bold');
         e.setAttribute('fill', logo.t_color);
-        e.textContent = partner.external ? partner.caption0 : partner.caption1 || partner.subcaption0;
+        e.textContent = logo.external_partners ? partner.caption0 : partner.caption1 || partner.subcaption0;
         iElement.appendChild(e);
       }
 
       // row 3
-      if (partner.caption0 && partner.caption1 && partner.subcaption0) {
+      if (!logo.external_partners && partner.caption0 && partner.caption1 && partner.subcaption0) {
         const e = SvgRenderer.newElement('text');
         e.setAttribute('x', X);
         e.setAttribute('y', $.gl + $.gs);
@@ -190,7 +194,13 @@ const SvgRenderer = {
       }
 
       // row 4
-      if (partner.caption0 && partner.caption1 && partner.subcaption0 && partner.subcaption1) {
+      if (
+        !logo.external_partners &&
+        partner.caption0 &&
+        partner.caption1 &&
+        partner.subcaption0 &&
+        partner.subcaption1
+      ) {
         const e = SvgRenderer.newElement('text');
         e.setAttribute('x', X);
         e.setAttribute('y', 2 * $.gl + $.gs);
@@ -227,14 +237,8 @@ const SvgRenderer = {
             img.addEventListener('error', reject, { once: true });
           });
 
-        if (rawImages) {
-          await imageLoaded(e);
-          e.setAttribute('width', e.getBBox().width);
-        } else {
-          imageLoaded(e).then(() => {
-            e.setAttribute('width', e.getBBox().width);
-          });
-        }
+        await imageLoaded(e);
+        e.setAttribute('width', e.getBBox().width);
       }
 
       await nextTick();
@@ -242,9 +246,10 @@ const SvgRenderer = {
       X += iElement.getBBox().width;
     }
 
+    await nextTick();
+
     const logo_padding = $.gl;
     const height = 3 * $.gl + 2 * $.gs;
-    await nextTick();
     const width = fg.getBBox().width;
     svg.setAttribute(
       'viewBox',

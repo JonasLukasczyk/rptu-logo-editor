@@ -28,14 +28,36 @@ const Server = {
       maxHttpBufferSize: 20 * 1024 * 1024,
     });
 
+    Server.io.use((socket, next) => {
+      const user = socket.request.headers['x-user'];
+      if (!user) {
+        // return next(new Error('unauthorized'));
+        socket.user = {
+          id: '342347283748',
+          name: 'Max Mustermann',
+          email: 'max@rptu.de',
+        };
+      } else {
+        socket.user = {
+          id: user,
+          name: socket.request.headers['x-display-name'],
+          email: socket.request.headers['x-display-name'],
+        };
+      }
+      next();
+    });
+
     Server.io.on('connect', socket => {
+      console.log(socket.user);
+
+      socket.on('getUser', (_, ack) => ack(socket.user));
       socket.on('getServices', (_, ack) => ack(Server.getServices()));
       const services = Server.getServices();
       for (let s in services) {
         const service = Server.services.get(s);
         for (let f of services[s]) {
           socket.on(s + '.' + f, async (args, ack) => {
-            ack(await service[f](...args, socket));
+            ack(await service[f](...args, socket, Server.io));
           });
         }
       }
@@ -55,7 +77,7 @@ const Server = {
 
     Server.app.use(express.static('../dist'));
 
-    const res = await Server.server.listen(PORT,'127.0.0.1');
+    const res = await Server.server.listen(PORT, '127.0.0.1');
     console.log('listening *:' + PORT);
   },
 };

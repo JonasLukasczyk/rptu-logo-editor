@@ -7,80 +7,20 @@ import $ from '../Constants.js';
 import svgpath from 'svgpath';
 
 import { useQuasar, Dialog } from 'quasar';
-import ThemeDialog from '../dialogs/ThemeDialog.vue';
-import FileDialog from '../dialogs/FileDialog.vue';
 import default_sub_logo from '../assets/default_sub_logo.js';
 
 const svg_container = ref(null);
 const $q = useQuasar();
 
-const refColorFriendly = ref(null);
-const refNotColorFriendly = ref(null);
-
 const _ = reactive({
-  grid: false,
-  valid: true,
   step: 1,
 });
 
 const update = async () => {
   const logo = App._.logo;
   if (!logo || !svg_container.value) return;
-
-  // const invalid_image_masks = [
-  //   [1, 1, 1, 1],
-  //   [0, 0, 0, 1],
-  //   [0, 1, 2, 0],
-  // ];
-  //
-  // _.valid = !invalid_image_masks.some(a => App.arraysAreEqual(a, logo.wm));
-
-  await nextTick();
-
   const svg = svg_container.value;
-  SvgRenderer.fromLogo(logo, svg);
-
-  await nextTick();
-
-  const e_layer = svg.appendChild(SvgRenderer.newElement('g'));
-  e_layer.appendChild(SvgRenderer.newElement('g'));
-
-  // grid layer
-  e_layer.children[0].innerHTML = '';
-  if (_.grid) {
-    const h = 130;
-    const w = 430;
-    {
-      let q = 0;
-
-      for (let i of $.x_coords) {
-        q += i;
-        const e = SvgRenderer.newElement('line');
-        e.setAttribute('x1', q);
-        e.setAttribute('y1', 0);
-        e.setAttribute('x2', q);
-        e.setAttribute('y2', h);
-        e.setAttribute('stroke', 'red');
-        e.setAttribute('stroke-width', 0.5);
-        e_layer.children[0].appendChild(e);
-      }
-    }
-
-    {
-      let q = 0;
-      for (let i of $.y_coords) {
-        q += i;
-        const e = SvgRenderer.newElement('line');
-        e.setAttribute('x1', 0);
-        e.setAttribute('y1', q);
-        e.setAttribute('x2', w);
-        e.setAttribute('y2', q);
-        e.setAttribute('stroke', 'red');
-        e.setAttribute('stroke-width', 0.5);
-        e_layer.children[0].appendChild(e);
-      }
-    }
-  }
+  await SvgRenderer.fromLogo(logo, svg,false,false);
 };
 
 const updateSync = async () => {
@@ -90,14 +30,9 @@ const updateSync = async () => {
 
 const init = async () => {
   await nextTick();
-  console.log(App._.logo);
   watch(() => _.grid, update);
-  watch(() => App._.logo, update, { deep: true });
+  watch(() => App._.logo, App.debounce(update,10), { deep: true });
   watch(() => App._.logo, App.debounce(updateSync, 1000), { deep: true });
-  // watch(()=>_.step, ()=>{
-  //   if(_.step===5)
-  //     computeColorTemplates();
-  // })
   update();
 };
 
@@ -105,6 +40,7 @@ onMounted(init);
 
 const test = async (logo, element) => {
   await nextTick();
+
   SvgRenderer.fromLogo(logo, element);
 };
 
@@ -112,7 +48,6 @@ const setTemplate = async template => {
   const clone = App.clone(template);
   const logo = App._.logo;
   for (let key of ['wm', 'show_rptu_text', 'co_branding']) logo[key] = clone[key];
-  // _.step = 2;
 };
 
 const computeColorTemplates = async (container, colorFriendly) => {
@@ -158,7 +93,6 @@ const addPartner = () => {
     caption1: '',
     subcaption0: 'Prof. Dr. Laura Muster',
     subcaption1: '',
-    external: false,
     logo: default_sub_logo,
   });
 };
@@ -174,27 +108,6 @@ const setLogo = (event, partner) => {
     partner.logo = e.target.result;
   };
   reader.readAsDataURL(file);
-  return;
-
-  Dialog.create({
-    component: FileDialog,
-    componentProps: {},
-    cancel: true,
-  })
-    .onOk(base64 => {
-      internal.logo = base64;
-    })
-    .onCancel(() => {
-      internal.logo = default_sub_logo;
-    });
-
-  // .onOk(base64 => {
-  //   console.log('ok')
-  //   // console.log(base64);
-  //   // internal.logo = base64 || default_sub_logo;
-  // }).onCancel(()=>{
-  //   console.log('cancel')
-  // });
 };
 
 const computeSvgFromCombination = async (c, element) => {
@@ -264,6 +177,14 @@ const setPictorial = async c => {
         <div style="text-align: center; padding-bottom: 2em">
           {{t(`Here you can add internal and external partners.`,`Hier können Sie interne und externe Partner hinzufügen.`)}}
         </div>
+        <div style="text-align: center; padding: 0 0 1em 0">
+          <q-checkbox
+            v-model="App._.logo.external_partners"
+            color="secondary"
+            :label="t(`External Partners`,`Externe Partner`)"
+            style="margin: 0 auto"
+          />
+        </div>
         <div class="compact">
           <q-card
             v-for="(partner, i) in App._.logo.co_branding"
@@ -278,24 +199,43 @@ const setPictorial = async c => {
               @click="() => deletePartner(partner)"
             />
             <q-card-section>
-              <template v-for="g of ['Caption', 'Subcaption']">
-                <template v-for="i of [0, 1]">
                   <q-input
-                    :placeholder="`${g} Row ${i + 1} ${i === 1 ? '(Optional)' : ''}`"
-                    v-if="!(g === 'Subcaption' && i === 1) || partner.caption1"
-                    v-model="partner[g.toLowerCase() + i]"
+                    placeholder="Caption Row 1"
+                    v-model="partner.caption0"
                     dense
-                    :input-style="partner[g.toLowerCase() + i] === '' ? 'color:#aaa;' : ''"
+                    :input-style="partner.caption0 === '' ? 'color:#aaa;' : ''"
                   />
-                </template>
-              </template>
+                  <q-input
+                    v-if='!App._.logo.external_partners'
+                    debounce='500'
+                    placeholder="Caption Row 2 (Optional)"
+                    v-model="partner.caption1"
+                    dense
+                    :input-style="partner.caption1 === '' ? 'color:#aaa;' : ''"
+                  />
+                  <q-input
+                    v-if='!App._.logo.external_partners'
+                    debounce='500'
+                    placeholder="Subcaption Row 1"
+                    v-model="partner.subcaption0"
+                    dense
+                    :input-style="partner.subcaption0 === '' ? 'color:#aaa;' : ''"
+                  />
+                  <q-input
+                    v-if='!App._.logo.external_partners && partner.caption1!==""'
+                    debounce='500'
+                    placeholder="Subcaption Row 2 (Optional)"
+                    v-model="partner.subcaption1"
+                    dense
+                    :input-style="partner.subcaption1 === '' ? 'color:#aaa;' : ''"
+                  />
               <br />
-              <img :src="partner.logo" style="display: block; margin: 0.5em auto 0 auto; max-height: 10em" />
+              <img :src="partner.logo" style="display: block; margin: 0.5em auto 0 auto; max-height: 10em; max-width:100%;" />
               <q-btn
                 label="Set Logo"
                 color="grey-4"
                 class="text-black"
-                style="margin: 0.5em auto; display: block"
+                style="margin: 0.5em auto; display: block;"
                 icon="image_search"
                 dense
                 @click="event => event.srcElement.nextSibling.click()"

@@ -2,6 +2,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import sqlite3 from 'sqlite3';
 
+const isAdmin = user => ['max@rptu.de'].includes(user.email);
+
 const LogoService = {
   name: 'LogoService',
 
@@ -35,35 +37,44 @@ const LogoService = {
     await LogoService.dbRun(`UPDATE logos SET data=? WHERE id=?`, [JSON.stringify(logo), logo.id]);
   },
 
-  newLogo: async user => {
+  newLogo: async socket => {
     const logo = {
       id: Date.now(),
       time: Date.now(),
-      user: user,
+      user: socket.user,
       wm: [0, 2, 1, 1],
       t_color: '#000000',
       b_color: '#ffffff',
       show_rptu_text: true,
       co_branding: [],
       verified: false,
+      external_partners: false
     };
     await LogoService.dbRun(`INSERT INTO logos ('id','time','email','data') VALUES (?,?,?,?)`, [
       logo.id,
       logo.time,
-      user.email,
+      socket.user.email,
       JSON.stringify(logo),
     ]);
     return logo;
   },
 
-  deleteLogo: async id => {
+  deleteLogo: async (id, socket, io) => {
     await LogoService.dbRun(`DELETE FROM logos WHERE id=?`, [id]);
+    io.emit('logo_deleted', id);
   },
 
-  getLogos: async user => {
+  toggleVerification: async (logo, socket, io) => {
+    if (!isAdmin(socket.user)) return;
+    logo.verified = !logo.verified;
+    await LogoService.updateLogo(logo);
+    io.emit('logo_updated', logo);
+  },
+
+  getLogos: async socket => {
     let data = null;
-    if (user.email === 'admin@rptu.de') data = await LogoService.dbAll(`SELECT data FROM logos`, []);
-    else data = await LogoService.dbAll(`SELECT data FROM logos WHERE email=?`, [user.email]);
+    if (isAdmin(socket.user)) data = await LogoService.dbAll(`SELECT data FROM logos`, []);
+    else data = await LogoService.dbAll(`SELECT data FROM logos WHERE email=?`, [socket.user.email]);
     return data.map(i => JSON.parse(i.data));
   },
 
@@ -97,7 +108,7 @@ const LogoService = {
       }
     });
 
-    // await LogoService.dropLogoTable();
+    await LogoService.dropLogoTable();
     await LogoService.createLogoTable();
   },
 };

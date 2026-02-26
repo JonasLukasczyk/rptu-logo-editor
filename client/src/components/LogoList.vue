@@ -6,44 +6,38 @@ import { ref, reactive, onMounted, nextTick } from 'vue';
 
 const downloadSVG = ref();
 
-const _ = reactive({
-  logos: [],
-});
-
 const init = async () => {
-  console.log('init');
-  _.logos = await App.LogoService.getLogos(App._.user);
+  App._.logos = await App.LogoService.getLogos();
 };
 
 const toggleVerify = logo => {
-  if (App._.user.email !== 'admin@rptu.de') return;
-  logo.verified = !logo.verified;
-  App.LogoService.updateLogo(logo);
+  // if (App._.user.email !== 'admin@rptu.de') return;
+  // logo.verified = !logo.verified;
+  App.LogoService.toggleVerification(logo);
 };
 
 const deleteLogo = async logo => {
   await App.LogoService.deleteLogo(logo.id);
-  init();
 };
 
 const newLogo = async () => {
-  App._.logo = await App.LogoService.newLogo(App._.user);
+  App._.logo = await App.LogoService.newLogo();
 };
 onMounted(init);
 </script>
 
 <template>
   <div>
-    <!-- <div style="font-weight: bold; font-size: 2em">Logos</div> -->
-
     <q-list dense>
-      <q-item v-if="_.logos.length < 1">
+      <q-item v-if="App._.logos.length < 1">
         <q-item-section>
           <table style="margin: 2em auto">
             <tbody>
               <tr>
                 <td><q-icon name="sym_o_hide_source" size="2em" class="text-grey-5" /></td>
-                <td>{{ t(`No logos associated with current account`, `TODO`) }}</td>
+                <td>
+                  {{ t(`No logos associated with current account`, `Keine Logos mit dem aktuellen Account verbunden`) }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -51,7 +45,7 @@ onMounted(init);
       </q-item>
 
       <q-item
-        v-for="(logo, index) in _.logos"
+        v-for="(logo, index) in App._.logos"
         :key="index"
         @click="() => (App._.logo = App.clone(logo))"
         style="padding: 1em 1em"
@@ -69,14 +63,26 @@ onMounted(init);
               </div>
               <div class="col-auto">
                 <q-btn
-                  v-if="false"
                   round
                   flat
                   :class="logo.verified ? 'text-green-6' : 'text-red-9'"
                   :icon="logo.verified ? 'verified' : 'sym_o_verified_off'"
                   dense
                   @click="() => toggleVerify(logo)"
-                />
+                >
+                  <q-tooltip
+                    >{{
+                      t(
+                        logo.verified
+                          ? `Verrified by the Department of University Communications`
+                          : `Requires verrification by the Department of University Communications`,
+                        logo.verified
+                          ? `Verifiziert von der Universitätskommunikation`
+                          : `Ausstehende verifizierung der Universitätskommunikation`
+                      )
+                    }}
+                  </q-tooltip>
+                </q-btn>
                 <q-btn round flat class="text-grey-9" icon="delete" dense @click="() => deleteLogo(logo)" />
                 <q-btn round flat class="text-grey-9" icon="edit_document" dense @click="() => (App._.logo = logo)" />
                 <q-btn round flat class="text-grey-9" icon="download" dense>
@@ -99,7 +105,7 @@ onMounted(init);
           </q-card-section>
 
           <q-card-section class="bg-strips" style="text-align: center; padding: 1em 1em 0.5em 1em">
-            <svg :ref="el => SvgRenderer.fromLogo(logo, el)" />
+              <svg :ref="el => SvgRenderer.fromLogo(logo, el)" />
           </q-card-section>
         </q-card>
       </q-item>
