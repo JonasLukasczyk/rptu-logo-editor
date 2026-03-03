@@ -4,9 +4,10 @@ import vue from '@vitejs/plugin-vue';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 
 export default defineConfig({
+  base: '/app/',
 
   build: {
-    outDir: '../dist'
+    outDir: '../dist',
   },
 
   plugins: [

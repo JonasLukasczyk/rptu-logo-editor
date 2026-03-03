@@ -5,6 +5,7 @@ import express from 'express';
 import { Server as IOServer } from 'socket.io';
 
 const PORT = 3000;
+const DEBUG = false;
 
 const Server = {
   services: new Map(),
@@ -20,28 +21,37 @@ const Server = {
     ),
 
   init: async services => {
-    Server.io = new IOServer(Server.server, {
-      cors: {
-        origin: `http://localhost:5173`,
-        methods: ['GET', 'POST'],
-      },
-      maxHttpBufferSize: 20 * 1024 * 1024,
-    });
+    if (DEBUG) {
+      Server.io = new IOServer(Server.server, {
+        cors: {
+          origin: `http://localhost:5173`,
+          methods: ['GET', 'POST'],
+        },
+        maxHttpBufferSize: 20 * 1024 * 1024,
+      });
+    } else {
+      Server.io = new IOServer(Server.server, {
+        maxHttpBufferSize: 20 * 1024 * 1024,
+      });
+    }
 
     Server.io.use((socket, next) => {
       const user = socket.request.headers['x-user'];
       if (!user) {
-        // return next(new Error('unauthorized'));
-        socket.user = {
-          id: '342347283748',
-          name: 'Max Mustermann',
-          email: 'max@rptu.de',
-        };
+        if (DEBUG) {
+          socket.user = {
+            id: '342347283748',
+            name: 'Max Mustermann',
+            email: 'max@rptu.de',
+          };
+        } else {
+          return next(new Error('unauthorized'));
+        }
       } else {
         socket.user = {
-          id: user,
-          name: socket.request.headers['x-display-name'],
-          email: socket.request.headers['x-display-name'],
+          id: socket.request.headers['x-pairwiseid'],
+          name: socket.request.headers['x-displayname'],
+          email: socket.request.headers['x-mail'],
         };
       }
       next();

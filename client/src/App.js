@@ -15,7 +15,7 @@ const App = {
     templates: [],
   }),
 
-  io: io(':3000', { maxHttpBufferSize: 20 * 1024 * 1024 }),
+  io: io({ path: '/app/socket.io', maxHttpBufferSize: 20 * 1024 * 1024 }),
 
   arraysAreEqual: (a, b) => {
     for (let i = 0; i < a.length; i++) {
@@ -152,9 +152,8 @@ App.io.on('connect', async () => {
 });
 App.io.on('disconnect', () => (App._.connected = false));
 App.io.on('logo_deleted', id => {
-  const idx = App._.logos.findIndex(l=>l.id===id);
-  if(idx>=0)
-    App._.logos.splice(idx,1);
+  const idx = App._.logos.findIndex(l => l.id === id);
+  if (idx >= 0) App._.logos.splice(idx, 1);
 });
 App.io.on('logo_updated', logo => {
   for (let l of App._.logos)
