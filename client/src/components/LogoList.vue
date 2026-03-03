@@ -55,7 +55,7 @@ onMounted(init);
             <div class="row items-center no-wrap">
               <div class="col">
                 <q-item-label style="font-weight: bold">ID: {{ logo.id }}</q-item-label>
-                <q-item-label caption lines="1">{{ t(`Author`, `Autor`) }}: {{ logo.user.email }}</q-item-label>
+                <q-item-label caption lines="1">{{ t(`Author`, `Autor`) }}: {{logo.user.name}} ({{ logo.user.email }})</q-item-label>
                 <q-item-label caption lines="1"
                   >{{ t(`Created`, `Erstellt`) }}:
                   {{ new Intl.DateTimeFormat('de-DE').format(new Date(logo.time)) }}</q-item-label

@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import sqlite3 from 'sqlite3';
 
-const isAdmin = user => ['max@rptu.de'].includes(user.email);
+const isAdmin = user => ['jonas.lukasczyk@rptu.de'].includes(user.email);
 
 const LogoService = {
   name: 'LogoService',
