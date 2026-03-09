@@ -3,6 +3,8 @@ import App from '../App.js';
 import t from '../Translator.js';
 import SvgRenderer from '../SvgRenderer.js';
 import { ref, reactive, onMounted, nextTick } from 'vue';
+import { Dialog } from 'quasar';
+import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 
 const downloadSVG = ref();
 
@@ -17,7 +19,15 @@ const toggleVerify = logo => {
 };
 
 const deleteLogo = async logo => {
-  await App.LogoService.deleteLogo(logo.id);
+  Dialog.create({
+    component: ConfirmationDialog,
+    componentProps: {
+      title: t('Delete Logo','Logo Löschen'),
+      message: t(`Do you want to delete logo ${logo.id}?`,`Wollen Sie Logo ${logo.id} löschen?`),
+    },
+  }).onOk(async () => {
+    await App.LogoService.deleteLogo(logo.id);
+  });
 };
 
 const newLogo = async () => {
@@ -55,7 +65,9 @@ onMounted(init);
             <div class="row items-center no-wrap">
               <div class="col">
                 <q-item-label style="font-weight: bold">ID: {{ logo.id }}</q-item-label>
-                <q-item-label caption lines="1">{{ t(`Author`, `Autor`) }}: {{logo.user.name}} ({{ logo.user.email }})</q-item-label>
+                <q-item-label caption lines="1"
+                  >{{ t(`Author`, `Autor`) }}: {{ logo.user.name }} ({{ logo.user.email }})</q-item-label
+                >
                 <q-item-label caption lines="1"
                   >{{ t(`Created`, `Erstellt`) }}:
                   {{ new Intl.DateTimeFormat('de-DE').format(new Date(logo.time)) }}</q-item-label
@@ -105,7 +117,7 @@ onMounted(init);
           </q-card-section>
 
           <q-card-section class="bg-strips" style="text-align: center; padding: 1em 1em 0.5em 1em">
-              <svg :ref="el => SvgRenderer.fromLogo(logo, el)" />
+            <svg :ref="el => SvgRenderer.fromLogo(logo, el)" />
           </q-card-section>
         </q-card>
       </q-item>

@@ -11,29 +11,11 @@ import LogoList from './components/LogoList.vue';
 import LogoEditor from './components/LogoEditor.vue';
 import LogoEditorStepper from './components/LogoEditorStepper.vue';
 import SideMenu from './components/SideMenu.vue';
-import RedHatB64 from './assets/red-hat-display-v21-latin-regular.js';
 
 const _ = reactive({});
 
 const ui_state = computed({
   get: () => (!App._.connected ? 'connecting' : App._.logo === null ? 'logo_list' : 'logo_editor'),
-});
-
-onMounted(() => {
-  const fontName = 'RedHat';
-  const fontStyle = `
-  @font-face {
-    font-family: '${fontName}';
-    src: url('data:font/woff2;base64,${RedHatB64}') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-  }
-`;
-
-  const style = document.createElement('style');
-  style.type = 'text/css';
-  style.appendChild(document.createTextNode(fontStyle));
-  document.head.appendChild(style);
 });
 </script>
 
@@ -47,9 +29,7 @@ onMounted(() => {
         <div style="display: flex; width: 100%; justify-content: space-between">
           <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
             <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" />
-            <span v-if='parseInt($q.screen.width) > 400'>
-              Logo Generator
-            </span>
+            <span v-if="parseInt($q.screen.width) > 400">Logo Generator</span>
           </div>
           <div style="flex: 1; text-align: right">
             <q-btn
@@ -164,10 +144,10 @@ body {
 
 .q-tooltip {
   padding: 0.5em 1em;
-  max-width:20em;
-  font-size:1em;
-  background-color:black;
-  color:white;
+  max-width: 20em;
+  font-size: 1em;
+  background-color: black;
+  color: white;
 }
 
 :root {
