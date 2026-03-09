@@ -47,6 +47,7 @@ const LogoService = {
       b_color: '#ffffff',
       show_rptu_text: true,
       co_branding: [],
+      finalized: false,
       verified: false,
       external_partners: false
     };

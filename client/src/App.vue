@@ -46,7 +46,10 @@ onMounted(() => {
       <div style="max-width: 1200px; margin: 0 auto">
         <div style="display: flex; width: 100%; justify-content: space-between">
           <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
-            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" />Logo Generator
+            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" />
+            <span v-if='parseInt($q.screen.width) > 400'>
+              Logo Generator
+            </span>
           </div>
           <div style="flex: 1; text-align: right">
             <q-btn
@@ -136,8 +139,8 @@ onMounted(() => {
 <style>
 @font-face {
   font-family: 'RedHat';
-  src: url('./assets/red-hat-display-v21-latin-regular.woff2') format('woff2');
-  font-weight: normal;
+  src: url('./assets/RedHatDisplay-VariableFont_wght.woff2') format('woff2');
+  font-weight: 100 1000;
   font-style: normal;
   font-display: swap;
 }

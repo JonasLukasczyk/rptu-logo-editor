@@ -1,7 +1,8 @@
 import { nextTick } from 'vue';
 import $ from './Constants.js';
-import red_hat_font_b64 from './assets/red-hat-display-v21-latin-regular.js';
-
+// import red_hat_font_b64 from './assets/red-hat-display-v21-latin-regular.js';
+import red_hat_font_b64 from './assets/RedHatDisplay-VariableFont_wght.js';
+// import red_hat_font_b64 from './assets/RedHatDisplay-Bold.js';
 import default_sub_logo from './assets/default_sub_logo.js';
 
 const wait = time => new Promise(resolve => setTimeout(resolve, time));
@@ -37,6 +38,7 @@ const SvgRenderer = {
         @font-face {
           font-family: 'RedHat';
           src: url('data:font/woff2;base64,${red_hat_font_b64}') format('woff2');
+          font-weight: 100 900;
         }
       `;
     style.textContent += `
@@ -87,7 +89,7 @@ const SvgRenderer = {
         e.setAttribute('x', $.letter_bb[0] * 4 + $.gs);
         e.setAttribute('y', $.gl + $.gs);
         e.setAttribute('font-size', '17');
-        e.setAttribute('font-weight', 'bold');
+        e.setAttribute('font-weight', '900');
         e.setAttribute('fill', logo.t_color);
         e.setAttribute('dominant-baseline', 'hanging');
         e.textContent = 'Rheinland-Pfälzische';
@@ -98,7 +100,7 @@ const SvgRenderer = {
         e.setAttribute('x', $.letter_bb[0] * 4 + $.gs);
         e.setAttribute('y', 2 * $.gl + $.gs);
         e.setAttribute('font-size', '17');
-        e.setAttribute('font-weight', 'bold');
+        e.setAttribute('font-weight', '900');
         e.setAttribute('fill', logo.t_color);
         e.textContent = 'Technische Universität';
         fg.appendChild(e);
@@ -159,7 +161,7 @@ const SvgRenderer = {
         e.setAttribute('fill', logo.t_color);
         e.setAttribute('text-anchor', 'start');
         e.setAttribute('dominant-baseline', 'hanging');
-        e.setAttribute('font-weight', 'bold');
+        e.setAttribute('font-weight', '900');
         e.textContent = logo.external_partners
           ? logo.co_branding.indexOf(partner) <= 0
             ? 'In Kooperation mit'
@@ -174,7 +176,7 @@ const SvgRenderer = {
         e.setAttribute('x', X);
         e.setAttribute('y', 35);
         e.setAttribute('font-size', '18');
-        if (!logo.external_partners && partner.caption1) e.setAttribute('font-weight', 'bold');
+        if (!logo.external_partners && partner.caption1) e.setAttribute('font-weight', '900');
         e.setAttribute('fill', logo.t_color);
         e.textContent = logo.external_partners ? partner.caption0 : partner.caption1 || partner.subcaption0;
         iElement.appendChild(e);
