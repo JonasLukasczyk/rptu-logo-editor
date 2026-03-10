@@ -109,7 +109,7 @@ const LogoService = {
       }
     });
 
-    await LogoService.dropLogoTable();
+//    await LogoService.dropLogoTable();
     await LogoService.createLogoTable();
   },
 };

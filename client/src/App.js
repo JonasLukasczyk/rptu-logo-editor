@@ -5,6 +5,8 @@ import $ from './Constants.js';
 
 import SvgRenderer from './SvgRenderer.js';
 
+const DEBUG = false;
+
 const App = {
   _: reactive({
     connected: false,
@@ -15,8 +17,7 @@ const App = {
     templates: [],
   }),
 
-  io: io(':3000',{ maxHttpBufferSize: 20 * 1024 * 1024 }),
-  // io: io({ path: '/app/socket.io', maxHttpBufferSize: 20 * 1024 * 1024 }),
+	io: DEBUG ? io(':3000',{ maxHttpBufferSize: 20 * 1024 * 1024 }) : io({ path: '/app/socket.io', maxHttpBufferSize: 20 * 1024 * 1024 }),
 
   arraysAreEqual: (a, b) => {
     for (let i = 0; i < a.length; i++) {

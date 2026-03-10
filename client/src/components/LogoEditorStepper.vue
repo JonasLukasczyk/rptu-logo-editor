@@ -78,7 +78,7 @@ const setColor = colors => {
   const logo = App._.logo;
   logo.b_color = colors[0];
   logo.t_color = colors[1];
-  _.step5 = 6;
+  _.step = 5;
 };
 
 const deletePartner = partner => {
@@ -369,7 +369,7 @@ const setPictorial = async c => {
             icon="auto_awesome_motion"
             color="primary"
             :label="t('Back to Logo List', '')"
-            @click="() => App.downloadMaster(App._.logo, 'jpeg', 0.99)"
+            @click="() => App._.logo = null"
           />
         </div>
       </q-step>

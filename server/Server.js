@@ -5,7 +5,7 @@ import express from 'express';
 import { Server as IOServer } from 'socket.io';
 
 const PORT = 3000;
-const DEBUG = true;
+const DEBUG = false;
 
 const Server = {
   services: new Map(),

@@ -17,6 +17,11 @@ const _ = reactive({});
 const ui_state = computed({
   get: () => (!App._.connected ? 'connecting' : App._.logo === null ? 'logo_list' : 'logo_editor'),
 });
+
+const logout = ()=>{
+window.location.href='Shibboleth.sso/Logout?return=/'
+};
+
 </script>
 
 <template>
@@ -47,7 +52,7 @@ const ui_state = computed({
             <q-btn flat dense icon="menu">
               <q-menu anchor="bottom right" self="top right">
                 <q-list style="min-width: 100px" dense>
-                  <q-item clickable v-close-popup @click="">
+			<q-item clickable v-close-popup @click="logout">
                     <q-item-section>Logout</q-item-section>
                   </q-item>
                   <q-separator />
