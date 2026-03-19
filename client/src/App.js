@@ -5,7 +5,7 @@ import $ from './Constants.js';
 
 import SvgRenderer from './SvgRenderer.js';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const App = {
   _: reactive({

@@ -137,23 +137,11 @@ const setPictorial = async c => {
       style="margin: 0; padding-bottom: 2em"
       :contracted="$q.screen.width < 750"
     >
-      <!-- <q-step :name="1" title="Templates" icon="sym_o_lists" active-icon="sym_o_lists" style="overflow: hidden"> -->
-      <!--   <StepTitle title="Templates" :steps="_" /> -->
-      <!--   <div style="text-align: center; padding-bottom: 2em"> -->
-      <!--     {{ -->
-      <!--       t( -->
-      <!--         `Choose any of the templates below to start creating your logo.`, -->
-      <!--         `Wählen Sie als erstes ein Grundgerüst aus.` -->
-      <!--       ) -->
-      <!--     }} -->
-      <!--   </div> -->
-      <!---->
-      <!--   <div style="max-width: 40em; margin: 0 auto"> -->
-      <!--     <div class="compact compact_list"> -->
-      <!--       <svg v-for="t in App._.templates" :ref="el => test(t, el)" @click="() => setTemplate(t)" /> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!-- </q-step> -->
+<template v-slot:message>
+  <div style='padding:1em;'>
+    <StepTitle :steps="_" />
+  </div>
+      </template>
 
       <q-step
         :name="2"
@@ -162,7 +150,6 @@ const setPictorial = async c => {
         active-icon="apps"
         style="overflow: hidden"
       >
-        <StepTitle :title="t(`Pictorial &amp; Wordmark`, `Bild- &amp; Textmarke`)" :steps="_" />
         <div style="text-align: center; padding-bottom: 2em">
           {{
             t(
@@ -190,7 +177,6 @@ const setPictorial = async c => {
       </q-step>
 
       <q-step :name="3" title="Co-Branding" icon="add_box" active-icon="add_box" style="overflow: hidden">
-        <StepTitle :title="`Co-Branding`" :steps="_" />
         <div style="text-align: center; padding-bottom: 2em">
           {{
             t(
@@ -210,7 +196,8 @@ const setPictorial = async c => {
         <div class="compact">
           <q-card
             v-for="(partner, i) in App._.logo.co_branding"
-            style="background-color: #fcfcfc; width: 100%; max-width: 25em; margin: 1em"
+            class='bg-grey-2'
+            style="width: 100%; max-width: 25em; margin: 1em;border:1px solid #ccc"
           >
             <q-btn
               icon="close"
@@ -223,6 +210,7 @@ const setPictorial = async c => {
             <q-card-section>
               <q-input
                 placeholder="Caption Row 1"
+                debounce="500"
                 v-model="partner.caption0"
                 dense
                 :input-style="partner.caption0 === '' ? 'color:#aaa;' : ''"
@@ -280,7 +268,6 @@ const setPictorial = async c => {
       </q-step>
 
       <q-step :name="4" :title="t(`Colors`, `Farben`)" icon="palette" active-icon="palette">
-        <StepTitle :title="t('Color Theme', 'Farbkombinationen')" :steps="_" />
         <div style="text-align: center; padding-bottom: 2em">
           {{
             t(
@@ -316,60 +303,23 @@ const setPictorial = async c => {
         <div class="compact" :ref="el => computeColorTemplates(el, false)" />
       </q-step>
 
-      <q-step :name="5" title="Download" icon="download" active-icon="download" style="overflow: hidden">
-        <StepTitle :title="t('Finalize', 'Abschliessen')" :steps="_" />
+      <q-step :name="5" :title="t('Save', 'Speichern')" icon="save" active-icon="save" style="overflow: hidden">
         <div style="text-align: center; padding-bottom: 2em">
           {{
             t(
-              `To download your logo mark it as finalized. Afterwards the logo can no longer be edited.`,
-              `Um das Logo herunterzuladen schliessen Sie bitte die bearbeitung ab. Das Logo kann danach nicht mehr bearbeitet werden.`
+              `Save your logo to donwload it afterwards from the logo list.`,
+              `Speichern Sie das Logo ab um es anschließend von der Logo Liste herunterzuladen.`
             )
           }}
-        </div>
-
-        <div style="text-align: center; padding-bottom: 2em">
-          <q-checkbox
-            v-model="App._.logo.finalized"
-            color="secondary"
-            :label="t(`Logo Finalized`, `Bearbeitung Abgeschlossen`)"
-            style="margin: 0 auto"
-          />
         </div>
 
         <div style="text-align: center">
           <q-btn
             :disabled="!App._.logo.finalized"
-            color="grey-4"
-            text-color="black"
-            label="SVG"
-            icon="download"
-            @click="() => App.downloadMaster(App._.logo, 'svg')"
-          />
-          &nbsp;
-          <q-btn
-            :disabled="!App._.logo.finalized"
-            color="grey-4"
-            text-color="black"
-            label="PNG"
-            icon="download"
-            @click="() => App.downloadMaster(App._.logo, 'png')"
-          />
-          &nbsp;
-          <q-btn
-            :disabled="!App._.logo.finalized"
-            color="grey-4"
-            text-color="black"
-            label="JPG"
-            icon="download"
-            @click="() => App.downloadMaster(App._.logo, 'jpeg', 0.99)"
-          />
-        </div>
-        <div style="text-align: center; margin: 2em 0 0 0">
-          <q-btn
-            icon="auto_awesome_motion"
             color="primary"
-            :label="t('Back to Logo List', '')"
-            @click="() => App._.logo = null"
+            :label="t('Save', 'Speichern')"
+            icon="save"
+            @click="() => App.downloadMaster(App._.logo, 'svg')"
           />
         </div>
       </q-step>
