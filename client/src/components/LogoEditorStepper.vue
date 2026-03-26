@@ -24,16 +24,9 @@ const update = async () => {
   await SvgRenderer.fromLogo(logo, svg, false, false);
 };
 
-const updateSync = async () => {
-  if (!App._.logo) return;
-  await App.LogoService.updateLogo(App._.logo);
-};
-
 const init = async () => {
   await nextTick();
-  watch(() => _.grid, update);
   watch(() => App._.logo, App.debounce(update, 10), { deep: true });
-  watch(() => App._.logo, App.debounce(updateSync, 1000), { deep: true });
   update();
 };
 
@@ -112,7 +105,10 @@ const setLogo = (event, partner) => {
 };
 
 const computeSvgFromCombination = async (c, element) => {
-  const logo = App.clone(App._.templates[0]);
+  if (App._.logo === null) return;
+  const logo = App.clone(App._.logo);
+  logo.co_branding = [];
+  logo.show_rptu_text = false;
   logo.wm = c;
   await nextTick();
   SvgRenderer.fromLogo(logo, element);
@@ -121,10 +117,15 @@ const computeSvgFromCombination = async (c, element) => {
 const setPictorial = async c => {
   App._.logo.wm = c;
 };
+
+const saveLogo = async () => {
+  await App.LogoService.updateLogo(App._.logo);
+  App._.logo = null;
+};
 </script>
 
 <template>
-  <div>
+  <div v-if="App._.logo !== null">
     <div class="logo_container bg-strips" style="text-align: center">
       <svg ref="svg_container" />
     </div>
@@ -137,10 +138,10 @@ const setPictorial = async c => {
       style="margin: 0; padding-bottom: 2em"
       :contracted="$q.screen.width < 750"
     >
-<template v-slot:message>
-  <div style='padding:1em;'>
-    <StepTitle :steps="_" />
-  </div>
+      <template v-slot:message>
+        <div style="padding: 1em">
+          <StepTitle :steps="_" />
+        </div>
       </template>
 
       <q-step
@@ -196,8 +197,8 @@ const setPictorial = async c => {
         <div class="compact">
           <q-card
             v-for="(partner, i) in App._.logo.co_branding"
-            class='bg-grey-2'
-            style="width: 100%; max-width: 25em; margin: 1em;border:1px solid #ccc"
+            class="bg-grey-2"
+            style="width: 100%; max-width: 25em; margin: 1em; border: 1px solid #ccc"
           >
             <q-btn
               icon="close"
@@ -314,13 +315,8 @@ const setPictorial = async c => {
         </div>
 
         <div style="text-align: center">
-          <q-btn
-            :disabled="!App._.logo.finalized"
-            color="primary"
-            :label="t('Save', 'Speichern')"
-            icon="save"
-            @click="() => App.downloadMaster(App._.logo, 'svg')"
-          />
+          <q-btn color="primary" class="q-ma-md" :label="t('Save', 'Speichern')" icon="save" @click="saveLogo" />
+            <q-btn color="red-8" class="q-ma-md" :label="t('Discard', 'Verwerfen')" icon="cancel" @click="()=>App._.logo=null" />
         </div>
       </q-step>
     </q-stepper>

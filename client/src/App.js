@@ -11,13 +11,11 @@ const App = {
   _: reactive({
     connected: false,
     logo: null,
-    logos: [],
+    logos: null,
     user: null,
     minified: true,
     templates: [],
   }),
-
-	io: DEBUG ? io(':3000',{ maxHttpBufferSize: 20 * 1024 * 1024 }) : io({ path: '/app/socket.io', maxHttpBufferSize: 20 * 1024 * 1024 }),
 
   arraysAreEqual: (a, b) => {
     for (let i = 0; i < a.length; i++) {
@@ -122,108 +120,84 @@ const App = {
     }
     App.download(logo.id + '.' + format, exportBlob);
   },
-};
 
-App.io.on('connect', async () => {
-  // Init Services
-  App._.user = await App.io.a_emit('getUser');
-  const services = await App.io.a_emit('getServices');
-
-  for (const name in services) {
-    const service = {
-      listeners: {},
-      on: (event, listener) => {
-        if (!service.listeners[event]) service.listeners[event] = [];
-        service.listeners[event].push(listener);
-      },
-      off: (event, listener) => {
-        if (!service.listeners[event]) return;
-        const index = service.listeners[event].indexOf(listener);
-        if (index !== -1) service.listeners[event].splice(index, 1);
-      },
-      trigger: (event, data) => {
-        service.listeners[event]?.forEach(listener => listener(...data));
-      },
-    };
-    for (let func of services[name]) service[func] = async (...args) => await App.io.a_emit(name + '.' + func, args);
-    App.io.on(name, (...args) => App[name].trigger(args[0], args.slice(1)));
-    App[name] = service;
-  }
-
-  App._.connected = true;
-});
-App.io.on('disconnect', () => (App._.connected = false));
-App.io.on('logo_deleted', id => {
-  const idx = App._.logos.findIndex(l => l.id === id);
-  if (idx >= 0) App._.logos.splice(idx, 1);
-});
-App.io.on('logo_updated', logo => {
-  for (let l of App._.logos)
-    if (l.id === logo.id) {
-      for (let k of Object.keys(logo)) l[k] = logo[k];
+  fetch: async (url, args = {}) => {
+    try {
+      const response = await window.fetch(url, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(args),
+      });
+      if (!response.ok) return null;
+      return response.json();
+    } catch (e) {
+      return null;
     }
-});
+  },
 
-App.io.a_emit = (name, params) => {
-  return new Promise((res, rej) => {
-    App.io.emit(name, params, res);
-  });
+  init: async () => {
+    const services = await App.fetch('http://localhost:3000/getServices');
+    for (let s of Object.keys(services)) {
+      App[s] = {};
+      for (let f of services[s]) App[s][f] = args => App.fetch(`http://localhost:3000/${s}.${f}`, args);
+    }
+
+    App._.connected = true;
+
+    console.log(services);
+  },
 };
 
+App.init();
+
+// App.io.on('connect', async () => {
+
+//   // Init Services
+//   App._.user = await App.io.a_emit('getUser');
+//   const services = await App.io.a_emit('getServices');
+//
+//   for (const name in services) {
+//     const service = {
+//       listeners: {},
+//       on: (event, listener) => {
+//         if (!service.listeners[event]) service.listeners[event] = [];
+//         service.listeners[event].push(listener);
+//       },
+//       off: (event, listener) => {
+//         if (!service.listeners[event]) return;
+//         const index = service.listeners[event].indexOf(listener);
+//         if (index !== -1) service.listeners[event].splice(index, 1);
+//       },
+//       trigger: (event, data) => {
+//         service.listeners[event]?.forEach(listener => listener(...data));
+//       },
+//     };
+//     for (let func of services[name]) service[func] = async (...args) => await App.io.a_emit(name + '.' + func, args);
+//     App.io.on(name, (...args) => App[name].trigger(args[0], args.slice(1)));
+//     App[name] = service;
+//   }
+//
+//   App._.connected = true;
+// });
+// App.io.on('disconnect', () => (App._.connected = false));
+// App.io.on('logo_deleted', id => {
+//   const idx = App._.logos.findIndex(l => l.id === id);
+//   if (idx >= 0) App._.logos.splice(idx, 1);
+// });
+// App.io.on('logo_updated', logo => {
+//   for (let l of App._.logos)
+//     if (l.id === logo.id) {
+//       for (let k of Object.keys(logo)) l[k] = logo[k];
+//     }
+// });
+//
+// App.io.a_emit = (name, params) => {
+//   return new Promise((res, rej) => {
+//     App.io.emit(name, params, res);
+//   });
+// };
+//
 // templates
-
-{
-  App._.templates.push({
-    time: Date.now(),
-    user: null,
-    wm: [1, 1, 1, 1],
-    t_color: '#000000',
-    b_color: '#ffffff',
-    show_rptu_text: false,
-    co_branding: [],
-    external_partners: false,
-  });
-  App._.templates.push({
-    time: Date.now(),
-    user: null,
-    wm: [0, 2, 1, 1],
-    t_color: '#000000',
-    b_color: '#ffffff',
-    show_rptu_text: true,
-    co_branding: [],
-    external_partners: false,
-  });
-
-  const partner = {
-    caption0: 'Bezeichnung der Institution',
-    caption1: '',
-    subcaption0: 'Prof. Dr. Laura Muster',
-    subcaption1: '',
-    logo: null,
-  };
-
-  App._.templates.push({
-    time: Date.now(),
-    user: null,
-    wm: [0, 2, 1, 1],
-    t_color: '#000000',
-    b_color: '#ffffff',
-    show_rptu_text: false,
-    co_branding: [App.clone(partner)],
-    external_partners: false,
-  });
-
-  App._.templates.push({
-    time: Date.now(),
-    user: null,
-    wm: [0, 2, 1, 1],
-    t_color: '#000000',
-    b_color: '#ffffff',
-    show_rptu_text: false,
-    co_branding: [App.clone(partner), App.clone(partner)],
-    external_partners: false,
-  });
-}
 
 console.log(App);
 

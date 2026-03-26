@@ -7,7 +7,7 @@ const isAdmin = user => ['jonas.lukasczyk@rptu.de'].includes(user.email);
 const LogoService = {
   name: 'LogoService',
 
-  dbAll: async (sql, params) => {
+  _dbAll: async (sql, params) => {
     return await new Promise((resolve, reject) => {
       LogoService.db.all(sql, params, (err, rows) => {
         if (err) {
@@ -21,8 +21,7 @@ const LogoService = {
     });
   },
 
-  dbRun: async (sql, params) => {
-    console.log(sql, params);
+  _dbRun: async (sql, params) => {
     return await new Promise((resolve, reject) => {
       LogoService.db.run(sql, params, err => {
         if (err) {
@@ -33,54 +32,53 @@ const LogoService = {
     });
   },
 
-  updateLogo: async logo => {
-    await LogoService.dbRun(`UPDATE logos SET data=? WHERE id=?`, [JSON.stringify(logo), logo.id]);
+  updateLogo: async (user, logo) => {
+    await LogoService._dbRun(`REPLACE INTO logos (id,time,email,data) VALUES (?,?,?,?)`, [
+      logo.id,
+      logo.time,
+      logo.user.email,
+      JSON.stringify(logo),
+    ]);
+    return true;
   },
 
-  newLogo: async socket => {
+  newLogo: async user => {
     const logo = {
       id: Date.now(),
       time: Date.now(),
-      user: socket.user,
+      user: user,
       wm: [0, 2, 1, 1],
       t_color: '#000000',
       b_color: '#ffffff',
       show_rptu_text: true,
       co_branding: [],
-      finalized: false,
       verified: false,
-      external_partners: false
+      external_partners: false,
     };
-    await LogoService.dbRun(`INSERT INTO logos ('id','time','email','data') VALUES (?,?,?,?)`, [
-      logo.id,
-      logo.time,
-      socket.user.email,
-      JSON.stringify(logo),
-    ]);
     return logo;
   },
 
-  deleteLogo: async (id, socket, io) => {
-    await LogoService.dbRun(`DELETE FROM logos WHERE id=?`, [id]);
-    io.emit('logo_deleted', id);
+  deleteLogo: async (user, { id }) => {
+    await LogoService._dbRun(`DELETE FROM logos WHERE id=?`, [id]);
+    return true;
   },
 
-  toggleVerification: async (logo, socket, io) => {
-    if (!isAdmin(socket.user)) return;
+  toggleVerification: async (user, { logo }) => {
+    if (!isAdmin(user)) return;
     logo.verified = !logo.verified;
     await LogoService.updateLogo(logo);
-    io.emit('logo_updated', logo);
+    return true;
   },
 
-  getLogos: async socket => {
+  getLogos: async user => {
     let data = null;
-    if (isAdmin(socket.user)) data = await LogoService.dbAll(`SELECT data FROM logos`, []);
-    else data = await LogoService.dbAll(`SELECT data FROM logos WHERE email=?`, [socket.user.email]);
+    if (isAdmin(user)) data = await LogoService._dbAll(`SELECT data FROM logos`, []);
+    else data = await LogoService._dbAll(`SELECT data FROM logos WHERE email=?`, [user.email]);
     return data.map(i => JSON.parse(i.data));
   },
 
   createLogoTable: async () => {
-    await LogoService.dbRun(
+    await LogoService._dbRun(
       `
       CREATE TABLE IF NOT EXISTS logos (
           id INTEGER PRIMARY KEY,
@@ -94,7 +92,7 @@ const LogoService = {
   },
 
   dropLogoTable: async () => {
-    await LogoService.dbRun(`DROP TABLE IF EXISTS logos`, []);
+    await LogoService._dbRun(`DROP TABLE IF EXISTS logos`, []);
     // await fs.rm(`./data/`,{recursive:true,force:true});
     // await fs.mkdir(`./data/`,{recursive:true});
   },
@@ -109,7 +107,7 @@ const LogoService = {
       }
     });
 
-//    await LogoService.dropLogoTable();
+    //    await LogoService.dropLogoTable();
     await LogoService.createLogoTable();
   },
 };

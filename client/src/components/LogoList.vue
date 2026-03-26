@@ -8,7 +8,9 @@ import ConfirmationDialog from '../dialogs/ConfirmationDialog.vue';
 
 const downloadSVG = ref();
 
-const init = async () => {
+const getLogos = async () => {
+  App._.logos = null;
+  await App.wait(500);
   App._.logos = await App.LogoService.getLogos();
 };
 
@@ -22,24 +24,40 @@ const deleteLogo = async logo => {
   Dialog.create({
     component: ConfirmationDialog,
     componentProps: {
-      title: t('Delete Logo','Logo Löschen'),
-      message: t(`Do you want to delete logo ${logo.id}?`,`Wollen Sie Logo ${logo.id} löschen?`),
+      title: t('Delete Logo', 'Logo Löschen'),
+      message: t(`Do you want to delete logo ${logo.id}?`, `Wollen Sie Logo ${logo.id} löschen?`),
     },
   }).onOk(async () => {
-    await App.LogoService.deleteLogo(logo.id);
+    await App.LogoService.deleteLogo({ id: logo.id });
+    getLogos();
   });
 };
 
 const newLogo = async () => {
   App._.logo = await App.LogoService.newLogo();
 };
-onMounted(init);
+onMounted(getLogos);
 </script>
 
 <template>
   <div>
     <q-list dense>
-      <q-item v-if="App._.logos.length < 1">
+      <div style="text-align: center" v-if="App._.logos !== null">
+        <q-btn 
+          :label="t('Logo', 'Logo')"
+          icon="add_circle" class="bg-primary text-white q-ma-md" @click="newLogo" />
+        <q-btn
+          :label="t('Refresh', 'Aktualisieren')"
+          icon="refresh"
+          class="bg-primary text-white q-ma-md"
+          @click="getLogos"
+        />
+      </div>
+
+      <q-item v-if="App._.logos === null">
+        <q-spinner size="4em" style="margin: 0 auto; display: block" />
+      </q-item>
+      <q-item v-else-if="App._.logos.length < 1">
         <q-item-section>
           <table style="margin: 2em auto">
             <tbody>
@@ -122,10 +140,6 @@ onMounted(init);
         </q-card>
       </q-item>
     </q-list>
-
-    <div style="text-align: center; margin-top: 1em">
-      <q-btn label="Logo" icon="add_circle" class="bg-primary text-white" @click="newLogo" />
-    </div>
   </div>
 </template>
 
