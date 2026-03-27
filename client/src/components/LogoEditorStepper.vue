@@ -5,7 +5,6 @@ import SvgRenderer from '../SvgRenderer.js';
 import StepTitle from './StepTitle.vue';
 import { watch, reactive, ref, onMounted, nextTick } from 'vue';
 import $ from '../Constants.js';
-import svgpath from 'svgpath';
 
 import { useQuasar, Dialog } from 'quasar';
 import default_sub_logo from '../assets/default_sub_logo.js';

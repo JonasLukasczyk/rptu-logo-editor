@@ -11,8 +11,6 @@
   "dependencies": {
     "@quasar/extras": "^1.17.0",
     "quasar": "^2.18.5",
-    "socket.io-client": "^4.8.1",
-    "svgpath": "^2.6.0",
     "vue": "^3.5.22"
   },
   "devDependencies": {

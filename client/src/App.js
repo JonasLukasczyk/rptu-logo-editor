@@ -136,10 +136,14 @@ const App = {
   },
 
   init: async () => {
-    const services = await App.fetch('http://localhost:3000/getServices');
+    const base = DEBUG
+      ? `http://${window.location.hostname}:3000`
+      : `${window.location.protocol}//${window.location.host}/app`;
+    console.log(base)
+    const services = await App.fetch(`${base}/getServices`);
     for (let s of Object.keys(services)) {
       App[s] = {};
-      for (let f of services[s]) App[s][f] = args => App.fetch(`http://localhost:3000/${s}.${f}`, args);
+      for (let f of services[s]) App[s][f] = args => App.fetch(`${base}/${s}.${f}`, args);
     }
 
     App._.connected = true;
@@ -149,55 +153,6 @@ const App = {
 };
 
 App.init();
-
-// App.io.on('connect', async () => {
-
-//   // Init Services
-//   App._.user = await App.io.a_emit('getUser');
-//   const services = await App.io.a_emit('getServices');
-//
-//   for (const name in services) {
-//     const service = {
-//       listeners: {},
-//       on: (event, listener) => {
-//         if (!service.listeners[event]) service.listeners[event] = [];
-//         service.listeners[event].push(listener);
-//       },
-//       off: (event, listener) => {
-//         if (!service.listeners[event]) return;
-//         const index = service.listeners[event].indexOf(listener);
-//         if (index !== -1) service.listeners[event].splice(index, 1);
-//       },
-//       trigger: (event, data) => {
-//         service.listeners[event]?.forEach(listener => listener(...data));
-//       },
-//     };
-//     for (let func of services[name]) service[func] = async (...args) => await App.io.a_emit(name + '.' + func, args);
-//     App.io.on(name, (...args) => App[name].trigger(args[0], args.slice(1)));
-//     App[name] = service;
-//   }
-//
-//   App._.connected = true;
-// });
-// App.io.on('disconnect', () => (App._.connected = false));
-// App.io.on('logo_deleted', id => {
-//   const idx = App._.logos.findIndex(l => l.id === id);
-//   if (idx >= 0) App._.logos.splice(idx, 1);
-// });
-// App.io.on('logo_updated', logo => {
-//   for (let l of App._.logos)
-//     if (l.id === logo.id) {
-//       for (let k of Object.keys(logo)) l[k] = logo[k];
-//     }
-// });
-//
-// App.io.a_emit = (name, params) => {
-//   return new Promise((res, rej) => {
-//     App.io.emit(name, params, res);
-//   });
-// };
-//
-// templates
 
 console.log(App);
 

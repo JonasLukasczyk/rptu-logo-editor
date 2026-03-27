@@ -1,6 +1,5 @@
 import path from 'path';
 import http from 'http';
-import https from 'https';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
