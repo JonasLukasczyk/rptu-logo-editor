@@ -118,7 +118,7 @@ const App = {
       const scale = 2;
       exportBlob = await App.blobToRaster(blob, scale * width, scale * height, true, format, quality);
     }
-    App.download(logo.id + '.' + format, exportBlob);
+    App.download('rptu_logo_' + logo.id + '.' + format, exportBlob);
   },
 
   fetch: async (url, args = {}) => {
@@ -139,7 +139,7 @@ const App = {
     const base = DEBUG
       ? `http://${window.location.hostname}:3000`
       : `${window.location.protocol}//${window.location.host}/app`;
-    console.log(base)
+    console.log(base);
     const services = await App.fetch(`${base}/getServices`);
     for (let s of Object.keys(services)) {
       App[s] = {};
