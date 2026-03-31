@@ -2,7 +2,6 @@
 import App from '../App.js';
 import { watch, reactive, ref, onMounted, nextTick } from 'vue';
 import $ from '../Constants.js';
-import svgpath from 'svgpath';
 
 import { Dialog } from 'quasar';
 import ThemeDialog from '../dialogs/ThemeDialog.vue';

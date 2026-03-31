@@ -70,7 +70,6 @@ const setColor = colors => {
   const logo = App._.logo;
   logo.b_color = colors[0];
   logo.t_color = colors[1];
-  _.step = 5;
 };
 
 const deletePartner = partner => {

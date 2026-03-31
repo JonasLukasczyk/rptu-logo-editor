@@ -1,6 +1,5 @@
 import { reactive, nextTick } from 'vue';
 
-import { io } from 'socket.io-client';
 import $ from './Constants.js';
 
 import SvgRenderer from './SvgRenderer.js';

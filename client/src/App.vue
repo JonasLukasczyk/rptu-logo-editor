@@ -18,10 +18,9 @@ const ui_state = computed({
   get: () => (!App._.connected ? 'connecting' : App._.logo === null ? 'logo_list' : 'logo_editor'),
 });
 
-const logout = ()=>{
-window.location.href='Shibboleth.sso/Logout?return=/'
+const logout = () => {
+  window.location.href = 'Shibboleth.sso/Logout?return=/';
 };
-
 </script>
 
 <template>
@@ -33,7 +32,7 @@ window.location.href='Shibboleth.sso/Logout?return=/'
       <div style="max-width: 1200px; margin: 0 auto">
         <div style="display: flex; width: 100%; justify-content: space-between">
           <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
-            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" />
+            <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" clickable />
             <span v-if="parseInt($q.screen.width) > 400">Logo Generator</span>
           </div>
           <div style="flex: 1; text-align: right">
@@ -52,7 +51,7 @@ window.location.href='Shibboleth.sso/Logout?return=/'
             <q-btn flat dense icon="menu">
               <q-menu anchor="bottom right" self="top right">
                 <q-list style="min-width: 100px" dense>
-			<q-item clickable v-close-popup @click="logout">
+                  <q-item clickable v-close-popup @click="logout">
                     <q-item-section>Logout</q-item-section>
                   </q-item>
                   <q-separator />
