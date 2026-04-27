@@ -33,7 +33,7 @@ const logout = () => {
         <div style="display: flex; width: 100%; justify-content: space-between">
           <div class="text-h6" :style="`flex: ${$q.screen.width > 700 ? 1 : 2}; text-align: left;padding-top:0.1em`">
             <img src="./assets/RPTU_logo-inverted.svg" style="height: 0.7em; margin-right: 0.5em" clickable />
-            <span v-if="parseInt($q.screen.width) > 400">Logo Generator</span>
+            <span v-if="parseInt($q.screen.width) > 400">Logo-Generator</span>
           </div>
           <div style="flex: 1; text-align: right">
             <q-btn

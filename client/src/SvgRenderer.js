@@ -146,7 +146,7 @@ const SvgRenderer = {
         const h = $.y_coords.slice(0, 6).reduce((i, agg) => i + agg, 0);
         i.setAttribute('d', `M ${X} ${0} L ${X} ${h}`);
         i.setAttribute('stroke', logo.t_color);
-        i.setAttribute('stroke-width', 2);
+        i.setAttribute('stroke-width', 1);
         iElement.appendChild(i);
       }
 
@@ -216,9 +216,19 @@ const SvgRenderer = {
       const sublogo = partner.logo || default_sub_logo;
 
       if (sublogo) {
-        const mini = partner.caption1;
-        const y = ($.gl + $.gs) * (mini ? 2 : 1);
-        const h = mini ? $.gl : 2 * $.gl + $.gs;
+        const nRows =
+          (partner.caption0 ? 1 : 0) +
+          (partner.caption1 ? 1 : 0) +
+          (partner.subcaption0 ? 1 : 0) +
+          (partner.subcaption1 ? 1 : 0);
+        const y = logo.external_partners ? $.gl + $.gs : nRows === 0 ? 0 : nRows < 3 ? $.gl + $.gs : ($.gl + $.gs) * 2;
+        const h = logo.external_partners
+          ? 2 * $.gl + 1 * $.gs
+          : nRows === 0
+            ? 3 * $.gl + 2 * $.gs
+            : nRows < 3
+              ? 2 * $.gl + 1 * $.gs
+              : $.gl;
 
         const e = SvgRenderer.newElement('image');
         e.setAttribute('x', X);

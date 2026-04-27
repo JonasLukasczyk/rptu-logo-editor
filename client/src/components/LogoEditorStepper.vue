@@ -70,6 +70,7 @@ const setColor = colors => {
   const logo = App._.logo;
   logo.b_color = colors[0];
   logo.t_color = colors[1];
+  _.step = 5;
 };
 
 const deletePartner = partner => {
@@ -271,7 +272,7 @@ const saveLogo = async () => {
           {{
             t(
               `Click on any logo to adapt the corresponding color theme.`,
-              `Klicken Sie auf einen Vorschlag um die Farbkombination zu übernehmen.`
+              `Klicken Sie auf einen Vorschlag, um die Farbkombination zu übernehmen.`
             )
           }}
         </div>
