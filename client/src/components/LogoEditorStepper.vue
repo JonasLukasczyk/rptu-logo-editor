@@ -14,6 +14,7 @@ const $q = useQuasar();
 
 const _ = reactive({
   step: 2,
+  invalid: false
 });
 
 const update = async () => {
@@ -121,6 +122,38 @@ const saveLogo = async () => {
   await App.LogoService.updateLogo(App._.logo);
   App._.logo = null;
 };
+
+const updateLetterEditor = async table => {
+  const tds = table.getElementsByTagName('td');
+  for (let j = 0; j < 3; j++) {
+    const i = App._.logo.wm[j];
+    for (let ii = 0; ii < 3; ii++) tds[ii * 4 + j].innerHTML = '';
+    tds[i * 4 + j].innerHTML = ['R', 'P', 'T'][j];
+  }
+};
+
+const initLetterEditor = async table => {
+  if(!table) return;
+  if (!table.init) {
+    const U = table.getElementsByTagName('td')[7];
+    U.innerHTML = `<svg style='height:0.75em;margin-top:10px;' viewBox='0 0 35 35'><path d="${$.U_path}"></path></svg>`
+    table.addEventListener('click', e => {
+      const cell = e.target.closest('td');
+      if (!cell) return;
+      if (cell.classList[0] !== 'letter_button') return;
+
+      const row = cell.parentElement;
+      const rowIdx = row.rowIndex;
+      const colIdx = cell.cellIndex;
+      App._.logo.wm[colIdx] = rowIdx;
+
+      _.invalid = !$.letter_combinations.some(a => App.arraysAreEqual(a, App._.logo.wm));
+    });
+
+    table.init = true;
+  }
+  updateLetterEditor(table);
+};
 </script>
 
 <template>
@@ -131,7 +164,7 @@ const saveLogo = async () => {
 
     <q-stepper
       v-model="_.step"
-      header-nav
+      :header-nav='!_.invalid'
       ref="stepper"
       animated
       style="margin: 0; padding-bottom: 2em"
@@ -166,13 +199,44 @@ const saveLogo = async () => {
             style="margin: 0 auto"
           />
         </div>
-        <div class="compact">
-          <svg
-            v-for="c in $.letter_combinations"
-            :class="App.arraysAreEqual(c, App._.logo.wm) ? 'selected' : ''"
-            :ref="el => computeSvgFromCombination(c, el)"
-            @click="() => setPictorial(c)"
-          />
+
+        <div>
+          <table :ref="initLetterEditor" class="letter_editor">
+            <tbody>
+              <tr>
+                <td class="letter_button">R</td>
+                <td class="letter_button">P</td>
+                <td class="letter_button"></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="letter_button"></td>
+                <td class="letter_button"></td>
+                <td class="letter_button">T</td>
+                <td>U</td>
+              </tr>
+              <tr>
+                <td class="letter_button">R</td>
+                <td class="letter_button"></td>
+                <td class="letter_button"></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+
+        <q-banner v-show='_.invalid' style="margin: 0 auto; max-width: 30em">
+          <template v-slot:avatar>
+            <q-icon name="warning" color="red-9" />
+          </template>
+          <div style="border-left: 0.1em solid black; padding-left: 1em">
+            {{
+              t(
+                `This letter combination is not valid.`,
+                `Diese Buchstabenanordnung ist nicht gestattet.`
+              )
+            }}
+          </div>
+        </q-banner>
         </div>
       </q-step>
 
@@ -315,7 +379,13 @@ const saveLogo = async () => {
 
         <div style="text-align: center">
           <q-btn color="primary" class="q-ma-md" :label="t('Save', 'Speichern')" icon="save" @click="saveLogo" />
-            <q-btn color="red-8" class="q-ma-md" :label="t('Discard', 'Verwerfen')" icon="cancel" @click="()=>App._.logo=null" />
+          <q-btn
+            color="red-8"
+            class="q-ma-md"
+            :label="t('Discard', 'Verwerfen')"
+            icon="cancel"
+            @click="() => (App._.logo = null)"
+          />
         </div>
       </q-step>
     </q-stepper>
@@ -335,6 +405,29 @@ const saveLogo = async () => {
 
 .logo_container svg {
   max-height: 12em;
+}
+
+.letter_editor {
+  font-weight: bold;
+  font-size: 4em;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.letter_editor td {
+  width: 1em;
+  text-align: center;
+  line-height: 1em;
+  height: 1.1em;
+  overflow: hidden;
+}
+
+.letter_editor .letter_button {
+  border: 2px solid #333;
+}
+
+.letter_editor .letter_button:hover {
+  background-color: var(--q-secondary);
 }
 
 .compact {

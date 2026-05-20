@@ -41,6 +41,7 @@ const props = defineProps({
           :label="t(`Continue`, `Weiter`)"
           dense
           @click="props.steps.step += 1"
+          :disabled='steps.invalid'
         />
         <q-btn v-else flat icon="chevron_right" dense @click="props.steps.step += 1" />
       </template>
