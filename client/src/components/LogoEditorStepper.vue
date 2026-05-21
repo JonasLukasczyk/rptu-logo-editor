@@ -213,7 +213,7 @@ const initLetterEditor = async table => {
                 <td class="letter_button"></td>
                 <td class="letter_button"></td>
                 <td class="letter_button">T</td>
-                <td>U</td>
+                <td class="letter_button_fixed">U</td>
               </tr>
               <tr>
                 <td class="letter_button">R</td>
@@ -423,6 +423,10 @@ const initLetterEditor = async table => {
 }
 
 .letter_editor .letter_button {
+  border: 2px solid #333;
+}
+
+.letter_editor .letter_button_fixed {
   border: 2px solid #333;
 }
 
