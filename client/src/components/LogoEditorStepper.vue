@@ -184,7 +184,7 @@ const initLetterEditor = async table => {
 <template>
   <div v-if="App._.logo !== null">
     <div class="logo_container bg-strips" style="text-align: center">
-      <svg ref="svg_container" style='z-index:2;"' />
+      <svg ref="svg_container" />
       <div style="color: #777; font-weight: bold; margin-top: 0.5em">{{ t('PREVIEW', 'VORSCHAU') }}</div>
     </div>
 
@@ -416,7 +416,7 @@ const initLetterEditor = async table => {
 <style>
 .logo_container {
   zoom: 1;
-  padding: 1em;
+  padding: 1em 1em 0 1em;
   min-height: 16em;
   height: 16em;
   display: flex;
@@ -426,7 +426,11 @@ const initLetterEditor = async table => {
 }
 
 .logo_container svg {
+  display: block;
+  max-width: 100%;
   max-height: 12em;
+  width: auto;
+  height: auto;
 }
 
 .letter_editor {

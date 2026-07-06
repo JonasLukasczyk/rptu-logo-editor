@@ -145,6 +145,11 @@ onMounted(getLogos);
 
 <style scoped>
 svg {
-  max-height: 10em;
+  display: block;
+  max-width: 100%;
+  max-height: 12em;
+  width: auto;
+  height: auto;
+  margin:0 auto;
 }
 </style>
