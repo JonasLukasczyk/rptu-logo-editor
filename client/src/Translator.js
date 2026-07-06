@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-const lang = ref('EN');
+const lang = ref('DE');
 
 const t = (en,de) => lang.value === 'EN' ? en : de;
 

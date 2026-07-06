@@ -105,10 +105,10 @@ onMounted(getLogos);
                       t(
                         logo.verified
                           ? `Verrified by the Department of University Communications`
-                          : `Requires verrification by the Department of University Communications`,
+                          : `Pending Verrification by the Department of University Communications`,
                         logo.verified
                           ? `Verifiziert von der Universitätskommunikation`
-                          : `Ausstehende verifizierung der Universitätskommunikation`
+                          : `Ausstehende Verifizierung der Universitätskommunikation`
                       )
                     }}
                   </q-tooltip>

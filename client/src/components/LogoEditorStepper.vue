@@ -1,6 +1,6 @@
 <script setup>
 import App from '../App.js';
-import t from '../Translator.js';
+import { t, lang } from '../Translator.js';
 import SvgRenderer from '../SvgRenderer.js';
 import StepTitle from './StepTitle.vue';
 import { watch, reactive, ref, onMounted, nextTick } from 'vue';
@@ -14,7 +14,7 @@ const $q = useQuasar();
 
 const _ = reactive({
   step: 2,
-  invalid: false
+  invalid: false,
 });
 
 const update = async () => {
@@ -123,20 +123,45 @@ const saveLogo = async () => {
   App._.logo = null;
 };
 
+const isValidLetterCombination = wm => {
+  return $.letter_combinations.some(a => App.arraysAreEqual(a, wm));
+};
+
 const updateLetterEditor = async table => {
   const tds = table.getElementsByTagName('td');
-  for (let j = 0; j < 3; j++) {
-    const i = App._.logo.wm[j];
-    for (let ii = 0; ii < 3; ii++) tds[ii * 4 + j].innerHTML = '';
-    tds[i * 4 + j].innerHTML = ['R', 'P', 'T'][j];
+  const letters = ['R', 'P', 'T'];
+
+  for (let rowIdx = 0; rowIdx < 3; rowIdx++) {
+    for (let colIdx = 0; colIdx < 3; colIdx++) {
+      const cell = tds[rowIdx * 4 + colIdx];
+
+      // cell.innerHTML = '';
+
+      cell.classList.remove('letter_choice_current', 'letter_choice_valid', 'letter_choice_invalid');
+
+      const candidate = [...App._.logo.wm];
+      candidate[colIdx] = rowIdx;
+
+      const isCurrent = App._.logo.wm[colIdx] === rowIdx;
+      const isValid = isValidLetterCombination(candidate);
+
+      if (isCurrent) {
+        cell.classList.add('letter_choice_current');
+        // cell.innerHTML = letters[colIdx];
+      } else if (isValid) {
+        cell.classList.add('letter_choice_valid');
+      } else {
+        cell.classList.add('letter_choice_invalid');
+      }
+    }
   }
 };
 
 const initLetterEditor = async table => {
-  if(!table) return;
+  if (!table) return;
   if (!table.init) {
     const U = table.getElementsByTagName('td')[7];
-    U.innerHTML = `<svg style='height:0.75em;margin-top:10px;' viewBox='0 0 35 35'><path d="${$.U_path}"></path></svg>`
+    U.innerHTML = `<svg style='height:0.75em;margin-top:10px;' viewBox='0 0 35 35'><path d="${$.U_path}"></path></svg>`;
     table.addEventListener('click', e => {
       const cell = e.target.closest('td');
       if (!cell) return;
@@ -159,12 +184,13 @@ const initLetterEditor = async table => {
 <template>
   <div v-if="App._.logo !== null">
     <div class="logo_container bg-strips" style="text-align: center">
-      <svg ref="svg_container" />
+      <svg ref="svg_container" style='z-index:2;"' />
+      <div style="color: #777; font-weight: bold; margin-top: 0.5em">{{ t('PREVIEW', 'VORSCHAU') }}</div>
     </div>
 
     <q-stepper
       v-model="_.step"
-      :header-nav='!_.invalid'
+      :header-nav="!_.invalid"
       ref="stepper"
       animated
       style="margin: 0; padding-bottom: 2em"
@@ -178,7 +204,7 @@ const initLetterEditor = async table => {
 
       <q-step
         :name="2"
-        :title="t(`Pictorial &amp; Wordmark`, `Bild- &amp; Textmarke`)"
+        :title="t(`Pictorial &amp; Word Mark`, `Bild- &amp; Textmarke`)"
         icon="apps"
         active-icon="apps"
         style="overflow: hidden"
@@ -186,8 +212,8 @@ const initLetterEditor = async table => {
         <div style="text-align: center; padding-bottom: 2em">
           {{
             t(
-              `Set wordmark visibility and choose pictorial.`,
-              `Stellen Sie die Sichtbarkeit der Textmarke ein und wählen Sie eine Bildmarke aus.`
+              `Set word mark visibility and choose pictorial.`,
+              `Stellen Sie die Sichtbarkeit der Textmarke ein und wählen Sie eine Bildmarke aus. Es gibt verschiedene zulässige Konfigurationen der Logo-Buchstaben. Platzieren Sie die Buchstaben durch Klicken des gewünschten Kästchens in der jeweiligen Spalte.`
             )
           }}
         </div>
@@ -195,7 +221,7 @@ const initLetterEditor = async table => {
           <q-checkbox
             v-model="App._.logo.show_rptu_text"
             color="secondary"
-            :label="t(`Show Wordmark`, `Textmarke Anzeigen`)"
+            :label="t(`Show word mark`, `Textmarke anzeigen`)"
             style="margin: 0 auto"
           />
         </div>
@@ -206,37 +232,32 @@ const initLetterEditor = async table => {
               <tr>
                 <td class="letter_button">R</td>
                 <td class="letter_button">P</td>
-                <td class="letter_button"></td>
+                <td class="letter_button">T</td>
                 <td></td>
               </tr>
               <tr>
-                <td class="letter_button"></td>
-                <td class="letter_button"></td>
+                <td class="letter_button">R</td>
+                <td class="letter_button">P</td>
                 <td class="letter_button">T</td>
                 <td class="letter_button_fixed">U</td>
               </tr>
               <tr>
                 <td class="letter_button">R</td>
-                <td class="letter_button"></td>
-                <td class="letter_button"></td>
+                <td class="letter_button">P</td>
+                <td class="letter_button">T</td>
                 <td></td>
               </tr>
             </tbody>
           </table>
 
-        <q-banner v-show='_.invalid' style="margin: 0 auto; max-width: 30em">
-          <template v-slot:avatar>
-            <q-icon name="warning" color="red-9" />
-          </template>
-          <div style="border-left: 0.1em solid black; padding-left: 1em">
-            {{
-              t(
-                `This letter combination is not valid.`,
-                `Diese Buchstabenanordnung ist nicht gestattet.`
-              )
-            }}
-          </div>
-        </q-banner>
+          <q-banner v-show="_.invalid" style="margin: 0 auto; max-width: 30em">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="red-9" />
+            </template>
+            <div style="border-left: 0.1em solid black; padding-left: 1em">
+              {{ t(`This letter combination is not valid.`, `Diese Buchstabenanordnung ist nicht gestattet.`) }}
+            </div>
+          </q-banner>
         </div>
       </q-step>
 
@@ -342,13 +363,13 @@ const initLetterEditor = async table => {
         </div>
 
         <div style="text-align: center; font-weight: bold; font-size: 1.5em">
-          <q-icon name="visibility" style="margin-right: 0.5em" />
+          <!-- <q-icon name="visibility" style="margin-right: 0.5em" /> -->
           {{ t(`Accessible Color Themes`, `Barrierefreie Farbkombinationen`) }}
         </div>
         <div class="compact" :ref="el => computeColorTemplates(el, true)" />
 
         <div style="text-align: center; font-weight: bold; font-size: 1.5em; margin-top: 3em">
-          <q-icon name="visibility_off" style="margin-right: 0.5em" />
+          <!-- <q-icon name="visibility_off" style="margin-right: 0.5em" /> -->
           {{ t(`Inaccessible Color Theme`, `Nicht barrierefreie Farbkombinationen`) }}
         </div>
         <q-banner style="margin: 0 auto; max-width: 60em">
@@ -371,8 +392,8 @@ const initLetterEditor = async table => {
         <div style="text-align: center; padding-bottom: 2em">
           {{
             t(
-              `Save your logo to donwload it afterwards from the logo list.`,
-              `Speichern Sie das Logo ab um es anschließend von der Logo Liste herunterzuladen.`
+              `Save your logo to download it afterwards from the logo list.`,
+              `Speichern Sie das Logo ab, um es anschließend von der Logo Liste herunterzuladen.`
             )
           }}
         </div>
@@ -396,11 +417,12 @@ const initLetterEditor = async table => {
 .logo_container {
   zoom: 1;
   padding: 1em;
-  min-height: 15em;
-  height: 15em;
+  min-height: 16em;
+  height: 16em;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .logo_container svg {
@@ -424,6 +446,7 @@ const initLetterEditor = async table => {
 
 .letter_editor .letter_button {
   border: 2px solid #333;
+  cursor: pointer;
 }
 
 .letter_editor .letter_button_fixed {
@@ -431,7 +454,40 @@ const initLetterEditor = async table => {
 }
 
 .letter_editor .letter_button:hover {
-  background-color: var(--q-secondary);
+  background-color: #eee;
+}
+
+.letter_choice_current {
+  color: black;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--letter-current-color) 0,
+    var(--letter-current-color) var(--letter-stripe-width),
+    transparent var(--letter-stripe-width),
+    transparent var(--letter-stripe-gap)
+  );
+}
+
+.letter_choice_valid {
+  color: var(--letter-valid-color);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--letter-valid-color) 0,
+    var(--letter-valid-color) var(--letter-stripe-width),
+    transparent var(--letter-stripe-width),
+    transparent var(--letter-stripe-gap)
+  );
+}
+
+.letter_choice_invalid {
+  color: var(--letter-invalid-color);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--letter-invalid-color) 0,
+    var(--letter-invalid-color) var(--letter-stripe-width),
+    transparent var(--letter-stripe-width),
+    transparent var(--letter-stripe-gap)
+  );
 }
 
 .compact {

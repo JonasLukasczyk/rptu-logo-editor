@@ -159,6 +159,13 @@ body {
   --stripe-size: 20px;
   --stripe-color1: #d2d2d2;
   --stripe-color2: #c2c2c2;
+
+  --letter-stripe-width: 2px;
+  --letter-stripe-gap: 6px;
+
+  --letter-current-color: rgba(0, 0, 0, 0.15);
+  --letter-valid-color: #26d07c66;
+  --letter-invalid-color: rgba(255, 0, 0, 0.2);
 }
 
 .bg-strips {
