@@ -70,11 +70,45 @@ const LogoService = {
     return true;
   },
 
-  getLogos: async user => {
-    let data = null;
-    if (isAdmin(user)) data = await LogoService._dbAll(`SELECT data FROM logos`, []);
-    else data = await LogoService._dbAll(`SELECT data FROM logos WHERE email=?`, [user.email]);
-    return data.map(i => JSON.parse(i.data));
+  getLogos: async (user, { cursor, n }) => {
+    const params = [];
+    const where = [];
+
+    if (!isAdmin(user)) {
+      where.push(`email = ?`);
+      params.push(user.email);
+    }
+
+    if (cursor) {
+      where.push(`(time < ? OR (time = ? AND id < ?))`);
+      params.push(cursor.time, cursor.time, cursor.id);
+    }
+
+    params.push(n);
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    const rows = await LogoService._dbAll(
+      `
+    SELECT id, time, data
+    FROM logos
+    ${whereSql}
+    ORDER BY time DESC, id DESC
+    LIMIT ?
+    `,
+      params
+    );
+
+    return {
+      data: rows.map(row => JSON.parse(row.data)),
+      nextCursor:
+        rows.length === n
+          ? {
+              time: rows[rows.length - 1].time,
+              id: rows[rows.length - 1].id,
+            }
+          : null,
+    };
   },
 
   createLogoTable: async () => {
