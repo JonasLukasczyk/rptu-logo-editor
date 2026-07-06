@@ -323,7 +323,9 @@ const SvgRenderer = {
 
     const logo_padding = $.gl;
     const height = 3 * $.gl + 2 * $.gs;
-    const width = fg.getBBox().width;
+
+    const bbox = fg.getBBox();
+    const width = Math.max(X, bbox.x + bbox.width);
 
     const viewWidth = width + 2 * logo_padding;
     const viewHeight = height + 2 * logo_padding;
